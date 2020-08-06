@@ -13,11 +13,11 @@ ENTRYOFFSET	=   0x400
 # Programs, flags, etc.
 ASM		= nasm
 DASM		= objdump
-CC		= gcc
-LD		= ld
+CC		= gcc -m32
+LD		= ld -m elf_i386
 ASMBFLAGS	= -I boot/include/
 ASMKFLAGS	= -I include/ -I include/sys/ -f elf
-CFLAGS		= -I include/ -I include/sys/ -c -fno-builtin -Wall
+CFLAGS		= -I include/ -I include/sys/ -c -fno-stack-protector -fno-builtin -Wall
 #CFLAGS		= -I include/ -c -fno-builtin -fno-stack-protector -fpack-struct -Wall
 LDFLAGS		= -Ttext $(ENTRYPOINT) -Map krnl.map
 DASMFLAGS	= -D
@@ -62,11 +62,11 @@ disasm :
 
 # We assume that "a.img" exists in current folder
 buildimg :
-	dd if=boot/boot.bin of=a.img bs=512 count=1 conv=notrunc
-	sudo mount -o loop a.img /mnt/floppy/
-	sudo cp -fv boot/loader.bin /mnt/floppy/
-	sudo cp -fv kernel.bin /mnt/floppy
-	sudo umount /mnt/floppy
+	dd if=boot/boot.bin of=snake.img bs=512 count=1 conv=notrunc
+	sudo mount -o loop snake.img /home
+	sudo cp -fv boot/loader.bin /home
+	sudo cp -fv kernel.bin /home
+	sudo umount /home
 
 boot/boot.bin : boot/boot.asm boot/include/load.inc boot/include/fat12hdr.inc
 	$(ASM) $(ASMBFLAGS) -o $@ $<
