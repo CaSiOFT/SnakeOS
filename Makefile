@@ -63,10 +63,10 @@ disasm :
 # We assume that "a.img" exists in current folder
 buildimg :
 	dd if=boot/boot.bin of=snake.img bs=512 count=1 conv=notrunc
-	sudo mount -o loop snake.img /home
-	sudo cp -fv boot/loader.bin /home
-	sudo cp -fv kernel.bin /home
-	sudo umount /home
+	sudo mount -o loop snake.img /mnt/floppy
+	sudo cp -fv boot/loader.bin /mnt/floppy
+	sudo cp -fv kernel.bin /mnt/floppy
+	sudo umount /mnt/floppy
 
 boot/boot.bin : boot/boot.asm boot/include/load.inc boot/include/fat12hdr.inc
 	$(ASM) $(ASMBFLAGS) -o $@ $<

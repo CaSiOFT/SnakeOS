@@ -28,6 +28,7 @@ PUBLIC void	set_video_start_addr(u32 addr);
 PUBLIC void	flush(CONSOLE* con);
 PUBLIC	void	w_copy(unsigned int dst, const unsigned int src, int size);
 PUBLIC void	clear_screen(int pos, int len);
+PUBLIC void out_char(CONSOLE* con, char ch);
 
 /*****************************************************************************
  *                                init_screen
