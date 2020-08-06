@@ -29,6 +29,7 @@ PUBLIC u32	seg2phys(u16 seg);
 PUBLIC void	delay(int time);
 PUBLIC void	disp_int(int input);
 PUBLIC char *	itoa(char * str, int num);
+PUBLIC int  atoi(const char * str, int * pNum);
 
 /* kernel.asm */
 PUBLIC void restart();

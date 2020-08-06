@@ -8,6 +8,8 @@
 #ifndef	_ORANGES_CONST_H_
 #define	_ORANGES_CONST_H_
 
+#define	TRUE	1
+#define	FALSE	0
 /* max() & min() */
 #define	max(a,b)	((a) > (b) ? (a) : (b))
 #define	min(a,b)	((a) < (b) ? (a) : (b))
@@ -45,7 +47,7 @@
 #define RECEIVING 0x04	/* set when proc trying to recv */
 
 /* TTY */
-#define NR_CONSOLES	3	/* consoles */
+#define NR_CONSOLES	4	/* consoles 增加一项*/
 
 /* 8259A interrupt controller ports. */
 #define	INT_M_CTL	0x20	/* I/O port for interrupt controller         <Master> */
