@@ -33,9 +33,10 @@ global	glitter
 ; ========================================================================
 disp_str:
 	push	ebp
+	push	ebx
 	mov	ebp, esp
 
-	mov	esi, [ebp + 8]	; pszInfo
+	mov	esi, [ebp + 12]	; pszInfo
 	mov	edi, [disp_pos]
 	mov	ah, 0Fh
 .1:
@@ -63,6 +64,7 @@ disp_str:
 .2:
 	mov	[disp_pos], edi
 
+	pop ebx
 	pop	ebp
 	ret
 
@@ -71,11 +73,12 @@ disp_str:
 ; ========================================================================
 disp_color_str:
 	push	ebp
+	push	ebx
 	mov	ebp, esp
 
-	mov	esi, [ebp + 8]	; pszInfo
+	mov	esi, [ebp + 12]	; pszInfo
 	mov	edi, [disp_pos]
-	mov	ah, [ebp + 12]	; color
+	mov	ah, [ebp + 16]	; color
 .1:
 	lodsb
 	test	al, al
@@ -101,6 +104,7 @@ disp_color_str:
 .2:
 	mov	[disp_pos], edi
 
+	pop ebx
 	pop	ebp
 	ret
 
