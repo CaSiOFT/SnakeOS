@@ -141,8 +141,8 @@ void colorful()
 	for (j = 0; j < 960; j++) { disp_str(" "); }
 	disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n", YELLOW);
 	disp_color_str("                                       jCOQQNNDMMRVx      \n", GREEN);
-	disp_color_str("                                     NMMNRSZLksMMDkNMMj  j\n", GREEN);
-	disp_color_str("                                    MKOAhfRNQQNSwQNNRjcish\n", GREEN);
+	disp_color_str("                                     NMMNRSZLksMMDkNMMj  ", GREEN);	disp_color_str("j\n", RED);
+	disp_color_str("                                    MKOAhfRNQQNSwQNNRj", GREEN);	disp_color_str("cish\n", RED);
 	disp_color_str("                                   QHwJCJRi jiccj       ", GREEN);disp_color_str("            jh         \n", GREEN);
 	disp_color_str("                                   jMLkPOQ              ", GREEN);disp_color_str("     jMMMMMMMc         \n", GREEN);
 	disp_color_str(" MB     LNMNNMR      jpBNNNNDr      aMKhkQj             ", GREEN);disp_color_str("    MMMMMMr            \n", YELLOW);
@@ -151,7 +151,8 @@ void colorful()
 	disp_color_str("           QOCpQ    NOCwDD  MNhlwSNH    jhClLlhM        ", GREEN);disp_color_str("NMCCSVSLSLfLVppDM  \n", YELLOW);
 	disp_color_str("           NQfVhR    DOLpDM  cRMMNBNNQhDOOfLlONM        ", GREEN);disp_color_str(" KMMNKhhOOOHRNMM     \n", YELLOW);
 	disp_color_str("            NMMNNMACfBNMMMMi    rhNNNNNMMMMMNRa         ", GREEN);disp_color_str("   cDNMMMMMNQC    \n", YELLOW);
-	disp_color_str("               cLZRMMNOprj\n", GREEN);
+	disp_color_str("               cLZRMMNOprj                              ", GREEN);disp_color_str("      NNNND    \n", YELLOW);
+	disp_color_str("                  QhDN\n", GREEN);
 	disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n", YELLOW);
 	milli_delay(80000);
 	disp_pos = 0;
