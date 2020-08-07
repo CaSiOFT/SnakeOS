@@ -25,6 +25,7 @@
 #define RED     0x4     /* 0100 */
 #define GREEN   0x2     /* 0010 */
 #define BLUE    0x1     /* 0001 */
+#define YELLOW	0x6		/* 0110 */
 #define FLASH   0x80    /* 1000 0000 */
 #define BRIGHT  0x08    /* 0000 1000 */
 #define	MAKE_COLOR(x,y)	((x<<4) | y) /* MAKE_COLOR(Background,Foreground) */

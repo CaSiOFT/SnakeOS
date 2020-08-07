@@ -28,7 +28,6 @@
 PUBLIC int kernel_main()
 {
 	disp_str("-----\"kernel_main\" begins-----\n");
-
 	struct task* p_task;
 	struct proc* p_proc= proc_table;
 	char* p_task_stack = task_stack + STACK_SIZE_TOTAL;
@@ -134,6 +133,53 @@ void clear()
 	console_table[current_console].cursor = 0;
 }
 
+void colorful()
+{
+	clear();
+	int j;
+	disp_pos = 0;
+	for (j = 0; j < 960; j++) { disp_str(" "); }
+	disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n", YELLOW);
+	disp_color_str("                          iB@@@2MMS8;   \n", GREEN);
+	disp_color_str("                         MM@ZSS22ZZMMiai;\n", GREEN);
+	disp_color_str("                        2@228B@@@8Bi  ;;\n", GREEN);
+	disp_color_str("                        S@r28             ", GREEN);disp_color_str("     i2MM;   \n", YELLOW);
+	disp_color_str(". i;     iaa:      ;aa;   .MBB8           ", GREEN);disp_color_str("   8MMMM  \n", YELLOW);
+	disp_color_str(" iMi   MMMMMi   2MMM@@@2    ;MS8Z         ", GREEN);disp_color_str("   ;Mra \n", YELLOW);
+	disp_color_str("   SMMMB aZ8B  rMZB  SB0MM    M2@MZ.      ", GREEN);disp_color_str(" 0@iiia0@@0 .  \n", YELLOW);
+	disp_color_str("   ;a;   288a   M2Sa  M2SMi    @SSM@      ", GREEN);disp_color_str("8Ma22S22aaMZ  \n", YELLOW);
+	disp_color_str("         @82@    @a@8   @@0M0iiZaaZM .    ", GREEN);disp_color_str(".;M@ZZ2SS8@M: \n", YELLOW);
+	disp_color_str("          :M@MB; @@MM    8MMMMMMMMMM      ", GREEN);disp_color_str("  8MMMMMM8    \n", YELLOW);
+	disp_color_str("             SBMMM8Sr        ;iii;\n", GREEN);
+	disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n", YELLOW);
+	milli_delay(80000);
+	disp_pos = 0;
+	clear();
+}
+
+void clearview()
+{
+	int i = 0;
+	for (i = 0; i < 25; i++)
+		printf("\n");
+}
+
+void welcome()
+{
+	clear();
+	printf("                        ==================================\n");
+	printf("                                   	  SnakeOS            \n");
+	printf("                                 Kernel on Orange's \n\n");
+	printf("                                      1851008\n");
+	printf("                                      1852657\n");
+	printf("                                      1853144\n");
+	printf("                                      1854204\n");
+	printf("                                      1854304\n");
+	printf("                                Enjoy using our OS:)\n");
+	printf("                        ==================================\n");
+	printf("\n\n\n\n\n\n\n\n\n\n");
+}
+
 /*======================================================================*
                                TestA
 							   主界面
@@ -156,14 +202,10 @@ void TestA()
 
 	const char bufw[80] = {0};
 
-	
-	clear();
-	printf("                        ==================================\n");
-	printf("                                   Xinux v1.0.0             \n");
-	printf("                                 Kernel on Orange's \n");
-	printf("                                     Welcome !\n");
-	printf("                        ==================================\n");
-	
+	colorful();
+	clearview();
+	welcome();
+
 	while (1) {
 		printl("[root@localhost /] ");
 		int r = read(fd_stdin, rdbuf, 70);
@@ -227,12 +269,8 @@ void TestA()
 		}
 		else if (strcmp(rdbuf, "cl") == 0)
 		{
-			clear();
-			printf("                        ==================================\n");
-			printf("                                   Xinux v1.0.0            \n");
-			printf("                                 Kernel on Orange's \n\n");
-			printf("                                     Welcome !\n");
-			printf("                        ==================================\n");
+			clearview();
+			welcome();
 		}
 		
 
