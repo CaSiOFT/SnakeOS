@@ -21,6 +21,18 @@
 #include "global.h"
 #include "proto.h"
 
+struct File {
+		char name[128];  //文件名
+		struct File* next;  //下一文件
+};
+
+struct Directory {
+		char name[128];  //目录名
+		struct Directory* next;  //下一目录
+		struct Directory* child;  //子目录
+		struct Directory* parent;  //父目录
+		struct File* link;  //该目录下首文件
+};
 
 /*======================================================================*
                             kernel_main
@@ -233,6 +245,7 @@ void TestA()
 		else if (!strcmp(rdbuf, "flm"))
 		{
 			printf("File Manager is already running on TTY1 ! \n");
+			TestB();
 			continue;
 
 		}
@@ -860,404 +873,7 @@ void Game3(int fd_stdin, int fd_stdout) {
         else
         printf("B is the winner!\n");
 }
-/*======================================================================*
-                               2048
-game4 
-You can manipulate the cube through keyboard.
-The numbers which are moved adds.
-The game is over when you have a number is 2048 ,which you win the game,or 
-you have no blank cube.
-*======================================================================*/
-/*
-PRIVATE void start_game(int fd_stdin);
-PRIVATE void reset_game();
 
-PRIVATE void move_left();
-PRIVATE void move_right();
-PRIVATE void move_up();
-PRIVATE void move_down();
-
-PRIVATE void refresh_show();
-PRIVATE void add_rand_num();
-PRIVATE void check_game_over();
-PRIVATE int get_null_count();
-
-int board[4][4];
-int score;
-int best;
-int if_need_add_num;
-int if_game_over;
-
-char rdbuf[128];
-
-
-
-PUBLIC void Game4(int fd_stdin, int fd_stdout)
-{
-    clear();
-//    disable_echo();
-    start_game(fd_stdin);
-//    enable_echo();
-    milli_delay(1000);
-    clear();
-}
-
-PRIVATE void start_game(int fd_stdin)
-{
-    reset_game();
-    char cmd;
-    memset(rdbuf, 0, sizeof(rdbuf));
-    while (1)
-    {
-        read(fd_stdin, rdbuf, 1);
-        cmd = rdbuf[0];
-
-        if (if_game_over)
-        {
-            if (cmd == 'y' || cmd == 'Y')
-            {
-                reset_game();
-                continue;
-            }
-            else if (cmd == 'n' || cmd == 'N')
-            {
-                return;
-            }
-            else
-            {
-                refresh_show();
-                continue;
-            }
-        }
-
-        if_need_add_num = 0;
-
-        switch (cmd)
-        {
-        case 'a':
-        case 'A':
-            move_left();
-            break;
-        case 's':
-        case 'S':
-            move_down();
-            break;
-        case 'w':
-        case 'W':
-            move_up();
-            break;
-        case 'd':
-        case 'D':
-            move_right();
-            break;
-        case 'q':
-        case 'Q':
-            return;
-        case 'r':
-        case 'R':
-            reset_game();
-            break;
-        default:
-            break;
-        }
-
-        score > best ? best = score : 1;
-
-        if (if_need_add_num)
-        {
-            add_rand_num();
-        }
-        refresh_show();
-    }
-}
-
-PRIVATE void reset_game()
-{
-    score = 0;
-    if_need_add_num = 1;
-    if_game_over = 0;
-
-    int n = myrand() % 16;
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            board[i][j] = (n-- == 0 ? 2 : 0);
-        }
-    }
-
-    add_rand_num();
-
-    clear();
-    refresh_show();
-}
-
-PRIVATE void add_rand_num()
-{
-    mysrand(get_ticks());
-    int n = myrand() % get_null_count();
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            if (board[i][j] == 0 && n-- == 0)
-            {
-                board[i][j] = (myrand() % 3 ? 2 : 4);
-                return;
-            }
-        }
-    }
-}
-
-PRIVATE int get_null_count()
-{
-    int n = 0;
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            board[i][j] == 0 ? n++ : 1;
-        }
-    }
-    return n;
-}
-
-PRIVATE void check_game_over()
-{
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-
-            if (board[i][j] == board[i][j + 1] || board[j][i] == board[j + 1][i])
-            {
-                if_game_over = 0;
-                return;
-            }
-        }
-    }
-    if_game_over = 1;
-}
-
-
-PRIVATE void move_left()
-{
-
-    for (int i = 0; i < 4; i++)
-    {
-
-        for (int j = 1, k = 0; j < 4; j++)
-        {
-            if (board[i][j] > 0)
-            {
-                if (board[i][k] == board[i][j])
-                {
-                    score += board[i][k++] <<= 1;
-                    board[i][j] = 0;
-                    if_need_add_num = 1;
-                }
-                else if (board[i][k] == 0)
-                {
-                    board[i][k] = board[i][j];
-                    board[i][j] = 0;
-                    if_need_add_num = 1;
-                }
-                else
-                {
-                    board[i][++k] = board[i][j];
-                    if (j != k)
-                    {
-                        board[i][j] = 0;
-                        if_need_add_num = 1;
-                    }
-                }
-            }
-        }
-    }
-}
-
-PRIVATE void move_right()
-{
-
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 2, k = 3; j >= 0; j--)
-        {
-            if (board[i][j] > 0)
-            {
-                if (board[i][k] == board[i][j])
-                {
-                    score += board[i][k--] <<= 1;
-                    board[i][j] = 0;
-                    if_need_add_num = 1;
-                }
-                else if (board[i][k] == 0)
-                {
-                    board[i][k] = board[i][j];
-                    board[i][j] = 0;
-                    if_need_add_num = 1;
-                }
-                else
-                {
-                    board[i][--k] = board[i][j];
-                    if (j != k)
-                    {
-                        board[i][j] = 0;
-                        if_need_add_num = 1;
-                    }
-                }
-            }
-        }
-    }
-}
-
-PRIVATE void move_up()
-{
-
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 1, k = 0; j < 4; j++)
-        {
-            if (board[j][i] > 0)
-            {
-                if (board[k][i] == board[j][i])
-                {
-                    score += board[k++][i] <<= 1;
-                    board[j][i] = 0;
-                    if_need_add_num = 1;
-                }
-                else if (board[k][i] == 0)
-                {
-                    board[k][i] = board[j][i];
-                    board[j][i] = 0;
-                    if_need_add_num = 1;
-                }
-                else
-                {
-                    board[++k][i] = board[j][i];
-                    if (j != k)
-                    {
-                        board[j][i] = 0;
-                        if_need_add_num = 1;
-                    }
-                }
-            }
-        }
-    }
-}
-
-PRIVATE void move_down()
-{
-
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 2, k = 3; j >= 0; j--)
-        {
-            if (board[j][i] > 0)
-            {
-                if (board[k][i] == board[j][i])
-                {
-                    score += board[k--][i] <<= 1;
-                    board[j][i] = 0;
-                    if_need_add_num = 1;
-                }
-                else if (board[k][i] == 0)
-                {
-                    board[k][i] = board[j][i];
-                    board[j][i] = 0;
-                    if_need_add_num = 1;
-                }
-                else
-                {
-                    board[--k][i] = board[j][i];
-                    if (j != k)
-                    {
-                        board[j][i] = 0;
-                        if_need_add_num = 1;
-                    }
-                }
-            }
-        }
-    }
-}
-
-PRIVATE void refresh_show()
-{
-
-    clear();
-    printf("                GAME: 2048     SCORE: %d    BEST: %d\n", score, best);
-    printf("             --------------------------------------------------\n\n");
-
-    //printf("                        ┌──┬──┬──┬──┐\n");
-    printf("                        ---------------------\n");
-    for (int i = 0; i < 4; i++)
-    {
-        printf("                        I");
-        for (int j = 0; j < 4; j++)
-        {
-            if (board[i][j] != 0)
-            {
-                if (board[i][j] < 10)
-                {
-                    printf("  %d I", board[i][j]);
-                }
-                else if (board[i][j] < 100)
-                {
-                    printf(" %d I", board[i][j]);
-                }
-                else if (board[i][j] < 1000)
-                {
-                    printf(" %dI", board[i][j]);
-                }
-                else if (board[i][j] < 10000)
-                {
-                    printf("%dI", board[i][j]);
-                }
-                else
-                {
-                    int n = board[i][j];
-                    for (int k = 1; k < 20; k++)
-                    {
-                        n >>= 1;
-                        if (n == 1)
-                        {
-                            printf("2^%dI", k);
-                            break;
-                        }
-                    }
-                }
-            }
-            else
-                printf("    I");
-        }
-
-        if (i < 3)
-        {
-            //printf("\n                        ├──┼──┼──┼──┤\n");
-            printf("\n                        I----I----I----I----I\n");
-        }
-        else
-        {
-            //printf("\n                        └──┴──┴──┴──┘\n");
-            printf("\n                        ---------------------\n");
-        }
-    }
-
-    printf("\n");
-    printf("             --------------------------------------------------\n");
-    printf("                  Direction: W A D S   Q:quit   R:restart   \n");
-
-
-    if (get_null_count() == 0)
-    {
-        check_game_over();
-        if (if_game_over)
-        {
-            printf("\nGAME OVER! TRY THE GAME AGAIN? [Y/N]");
-        }
-    }
-}
-*/
 
 /*======================================================================*
                                TestB
@@ -1269,6 +885,14 @@ PRIVATE void refresh_show()
 在调用oranges系统已有的文件操作基础上进行了界面设计(参阅/fs/文件夹)
 仅提供文件创建,文件删除，文件打开，文件读写等操作
 */
+
+struct Directory D[100];
+struct File F[100];
+int Dpos = 0;
+int Fpos = 0;
+
+struct Directory* root = 0;
+struct Directory* current = 0;
 
 void TestB()
 {
@@ -1287,17 +911,25 @@ void TestB()
 
 	/*定义相关参数*/
 
+
 	char file_name[128];//操作的文件名
 	char cmd[8];//进行的操作
 	char rdbuf[128];
 
+	root = &D[Dpos];
+	Dpos++;
+	root->child = 0;
+	root->link = 0;
+	root->next = 0;
+	root->parent = 0;
+	strcpy(root->name, "root");
 
-	char created_table[100][20] = { 0 };//已存在的文件列表 最大存在100个文件
-	int numOfcreate = 0;
-
+	current = root;
 
 	while (1) {
-		printf("$ ");
+
+		makepath(root, current);
+		printf(" $ ");
 
 		/*读取用户输入*/
 		int r = read(fd_stdin, rdbuf, 80);
@@ -1309,18 +941,7 @@ void TestB()
 			continue;
 		}
 		else if (!strcmp(rdbuf, "ls")) {
-			if (!numOfcreate) {
-				printf("no file\n");
-				continue;
-			}
-			int i;
-			for (i = 0; i < numOfcreate; i++) {
-				printf("%s    ", created_table[i]);
-				if (i!=0&&(i % 5) == 0) {
-					printf("\n");
-				}
-			}
-			printf("\n");
+			displayCurrentDirectory(root);
 			continue;
 		}
 		else {
@@ -1347,24 +968,33 @@ void TestB()
 			file_name[j] = 0;
 
 			/*开始执行命令*/
-			if (!strcmp(cmd, "cre")) {
-				if (create_file(file_name)) {
-					/*文件列表没有该文件*/
-					memcpy(created_table[numOfcreate], file_name, 20);
-					numOfcreate++;
-					continue;
-				}
-			}
-			else if (!strcmp(cmd, "rd")) {
-				read_file(file_name);
+			if (!strcmp(cmd, "crefile")) {
+				createFile(file_name);
 				continue;
 			}
-			else if (!strcmp(cmd, "wt")) {
-				write_file(file_name, fd_stdin);
+			else if (!strcmp(cmd, "rdfile")) {
+				readFile(file_name);
 				continue;
 			}
-			else if (!strcmp(cmd, "del")) {
-				del_file(file_name);
+			else if (!strcmp(cmd, "wtfile")) {
+				writeFile(file_name, fd_stdin);
+				continue;
+			}
+			else if (!strcmp(cmd, "delfile")) {
+				deleteFile(file_name);
+				continue;
+			}
+			else if (!strcmp(cmd, "credir")) {
+				createDirectory(file_name);
+				continue;
+			}
+			else if (!strcmp(cmd, "deldir")) {
+				deleteDirectory(file_name);
+				continue;
+			}
+			else if (!strcmp(cmd, "cd")) {
+				if(strcmp(file_name, "..") == 0) BackParentsDirectory();
+				else EnterChildDirectory(file_name);
 				continue;
 			}
 			else {
@@ -1380,11 +1010,15 @@ void help_b() {
 	printf("=============================================================================\n");
 	printf("Command List     :\n");
 	printf("1. ls                   : list the all files \n");
-	printf("1. cre [filename]       : Create a new file \n");
-	printf("2. rd [filename]        : Read the file\n");
-	printf("3. wt [filename]        : Write at the end of the file\n");
-	printf("4. del [filename]       : Delete the file\n");
-	printf("5. help                 : Show operation guide\n");
+	printf("2. crefile [filename]   : Create a new file \n");
+	printf("3. credir [dirname]     : Create a new directory \n");
+	printf("4. rdfile [filename]    : Read the file\n");
+	printf("5. wtfile [filename]    : Write at the end of the file\n");
+	printf("6. delfile [filename]   : Delete the file\n");
+	printf("7. deldir [dirname]     : Delete the directory \n");
+	printf("8. cd [dirname]         : Enter the directory \n");
+	printf("9. cd ..                : Return to parents directory \n");
+	printf("x. help                 : Show operation guide\n");
 	printf("==============================================================================\n");
 }
 
@@ -1392,14 +1026,76 @@ void help_b() {
 文件操作相关函数
 *======================================================================*/
 
-int create_file(char* file_name) {
+void makepath()
+{
+	printf("\\root");
+	if(current != root) {
+		struct Directory* p = root->child;
+		while(p != current->child) {
+			printf("\\%s", p->name);
+			p = p->child;
+		}
+	}
+}
+
+void initDirectory(struct Directory *p)
+{
+	p->child = 0;
+	p->link = 0;
+	p->next = 0;
+	p->parent = 0;
+}
+
+void initFile(struct File *p)
+{
+	p->next = 0;
+}
+
+int createDirectory(char* file_name)
+{
+	struct Directory* p = current->child;
+	if (p == 0) {
+		current->child = &D[Dpos];
+		Dpos++;
+		initDirectory(current->child);
+		p = current->child;
+	}
+	else {
+		while (p->next != 0) p = p->next;
+		p->next = &D[Dpos];
+		Dpos++;
+		initDirectory(p->next);
+		p = p->next;
+	}
+	p->parent = current;
+	strcpy(p->name, file_name);
+	printf("Directory create successful: %s\n", file_name);
+}
+
+int createFile(char* file_name) 
+{
 	int fd;
-	/*调用Orange系统写好的文件系统相关接口函数*/
 	fd = open(file_name, O_CREAT | O_RDWR);
-	if(fd==-1){
+	if(fd == -1){
 		printf("Create file failed! the file has been existed.\n");
 		return -1;
 	}
+
+	struct File* p = current->link;
+	if (p == 0) {
+		current->link = &F[Fpos];
+		Fpos++;
+		initFile(current->link);
+		p = current->link;
+	}
+	else {
+		while (p->next != 0) p = p->next;
+		p->next = &F[Fpos];
+		Fpos++;
+		initFile(p->next);
+		p = p->next;
+	}
+	strcpy(p->name, file_name);
 	
 	char buf[128];
 	buf[0] = 0;
@@ -1409,12 +1105,40 @@ int create_file(char* file_name) {
 	return 1;
 }
 
-int read_file(char* file_name) {
+int inCurrentF(char* file_name)
+{
+	struct File* p = current->link;
+	while(p != 0){
+		if(strcmp(p->name, file_name) == 0){
+			return 1;
+		}
+		p = p->next;
+	}
+	return 0;
+}
+
+int inCurrentD(char* file_name)
+{
+	struct Directory* p = current->child;
+	while(p != 0){
+		if(strcmp(p->name, file_name) == 0){
+			return 1;
+		}
+		p = p->next;
+	}
+	return 0;
+}
+
+int readFile(char* file_name) 
+{
 	int fd;
-	/*调用Orange系统写好的文件系统相关接口函数*/
 	fd = open(file_name, O_RDWR);
 	if (fd ==-1) {
 		printf("Open file failed! please check the filename \n");
+		return -1;
+	}
+	if(!inCurrentF(file_name)) {
+		printf("Open file failed! it isn't in current directory \n");
 		return -1;
 	}
 
@@ -1425,7 +1149,8 @@ int read_file(char* file_name) {
 	return 1;
 }
 
-int write_file(char* file_name,int fd_stdin) {
+int writeFile(char* file_name,int fd_stdin) 
+{
 	int fd;
 	fd = open(file_name, O_RDWR);
 	if (fd == -1)
@@ -1433,6 +1158,11 @@ int write_file(char* file_name,int fd_stdin) {
 		printf("Open file failed! please check the filename \n");
 		return -1;
 	}
+	if(!inCurrentF(file_name)) {
+		printf("Open file failed! it isn't in current directory \n");
+		return -1;
+	}
+
 	char buf[128];
 	int r = read(fd_stdin, buf, 80);
 	buf[r] = 0;
@@ -1442,7 +1172,21 @@ int write_file(char* file_name,int fd_stdin) {
 	return 1;
 }
 
-int del_file(char* file_name) {
+int deleteFile(char* file_name) 
+{
+	if(!inCurrentF(file_name)) {
+		printf("Delete file failed! it isn't in current directory \n");
+		return -1;
+	}
+	struct File* p = current->link;
+	struct File* q = p;
+	while(strcmp(p->name, file_name) != 0) p = p->next;
+	if(p == current->link) current->link = p->next;
+	else {
+		while(q->next != p) q = q->next;
+		q->next = p->next;
+	}
+
 	int r = unlink(file_name);
 	if (r == 0)
 	{
@@ -1453,6 +1197,95 @@ int del_file(char* file_name) {
 	{
 		printf("Delete file failed! Please check the fileaname!\n");
 		return -1;
+	}
+}
+
+void clearFile(struct Directory* d, struct File* f)
+{
+	if (d->link == f) {
+		d->link = f->next;
+	}
+	else {
+		struct File* p = d->link;
+		while (p->next != f) p = p->next;
+		p->next = f->next;
+	}
+	int r = unlink(f->name);
+}
+
+void Clear(struct Directory* x)
+{
+	while (x->link != 0) clearFile(x, x->link);
+	while (x->child!= 0) {
+		struct Directory* p = x->child;
+		x->child = p->next;
+		Clear(p);
+	}
+}
+
+int deleteDirectory(char* file_name)
+{
+	if(!inCurrentD(file_name)) {
+		printf("Delete directory failed! it isn't in current directory \n");
+		return -1;
+	}
+	struct Directory* p = current->child;
+	while (p != 0) {
+		if (strcmp(p->name, file_name) == 0) break;
+		p = p->next;
+	}
+	if (p == current->child) current->child = p->next;
+	else {
+		struct Directory* q = current->child;
+		while (q->next != p) q = q->next;
+		q->next = p->next;
+	}
+	Clear(p);
+	printf("Directory delete successful!\n");
+	return 1;
+}
+
+int EnterChildDirectory(char* file_name)
+{
+	if(!inCurrentD(file_name)) {
+		printf("Enter directory failed! it isn't in current directory \n");
+		return -1;
+	}
+	struct Directory* p = current->child;
+	while(strcmp(p->name, file_name) != 0) p = p->next;
+	current = p;
+	printf("Enter directory successfully!\n");
+	return 1;
+}
+
+int BackParentsDirectory()
+{
+	if(current == root){
+		printf("root has no parents directory!\n");
+		return -1;
+	}
+	else{
+		current = current->parent;
+		printf("Back parents directory successfully!\n");
+		return 1;
+	}
+}
+
+void displayCurrentDirectory()
+{
+	if(current->link == 0 && current->child == 0)
+		printf("NOTHING!\n");
+	else{
+		struct Directory* p = current->child;
+		struct File* q = current->link;
+		while(p != 0) {
+			printf("Floader: %s\n", p->name);
+			p = p->next;
+		}
+		while(q != 0) {
+			printf("File: %s\n", q->name);
+			q = q->next;
+		}
 	}
 }
 
