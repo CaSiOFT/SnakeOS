@@ -149,7 +149,7 @@ void colorful()
 {
 	clear();
 	int j;
-	int delay_time = 4000;
+	int delay_time = 2000;
 	int start_loc = 1520;
 	disp_pos = 0;
 	for (j = 0; j < start_loc; j++) { disp_str(" "); }
@@ -756,7 +756,7 @@ void TestA()
 		else if (!strcmp(rdbuf, "game2"))
 		{
 
-			//Game2(fd_stdin, fd_stdout);
+			Game2(fd_stdin, fd_stdout);
 		}
                else if (!strcmp(rdbuf, "game3"))
 		{
@@ -1286,14 +1286,259 @@ void Game1(int fd_stdin, int fd_stdout){
 }
 /*======================================================================*
 小游戏2 
-贪吃蛇
+五子棋
 *======================================================================*/
+int px,py;
+int ROWS=10,COLS=10;//棋盘尺寸
+char board[10][10];
+void init_board();
+void Display_board(int fd_stdin, int fd_stdout);
+int player_move(int fd_stdin, int fd_stdout);
+void computer_move();
+static int Is_full( int row, int col);
+int check_win(int m,int n);
+char Is_win();
 
-/*需要用到的一些初始值
-	坐标体系
-	↑x
-	→y
-*/
+void init_board()
+{
+	for(int i=0;i<ROWS;i++){
+		for(int j=0;j<COLS;j++){
+			board[i][j]=' ';
+		}
+	}
+}
+void Display_board(int fd_stdin, int fd_stdout)
+{
+	clear();
+	menu();
+	int i = 0;
+	for (i = 0; i < ROWS; i++)
+	{
+		if(i==0) printf("                           1  2  3  4  5  6  7  8  9  10\n");
+		if (i != ROWS-1){
+			printf("                        %d  %c |%c |%c |%c |%c |%c |%c |%c |%c |%c\n", i+1, board[i][0], board[i][1], board[i][2], board[i][3], board[i][4], board[i][5], board[i][6], board[i][7], board[i][8], board[i][9]);
+			printf("                           --|--|--|--|--|--|--|--|--|--\n");          //打印棋盘规格
+		}
+		if(i==ROWS-1) printf("                        10 %c |%c |%c |%c |%c |%c |%c |%c |%c |%c\n",board[i][0], board[i][1], board[i][2], board[i][3], board[i][4], board[i][5], board[i][6], board[i][7], board[i][8], board[i][9]);
+	}
+}
+int player_move(int fd_stdin, int fd_stdout)
+{
+	while (1)
+	{
+		clear();
+		Display_board(fd_stdin,fd_stdout);
+		printf("Please input your next location:");
+		char cx[3];
+		char cy[3];
+		int r = read(fd_stdin, cx, 2);
+		cx[r] = 0;
+		if(!strcmp(cx,"q")){
+			return -1;
+		}
+		atoi(cx, &px);
+		int t = read(fd_stdin, cy, 2);
+		cy[t] = 0;
+		atoi(cy, &py);
+		px--;
+		py--;
+		if (((px >= 0) && (px < ROWS)) && ((py >= 0) && (py < COLS)))
+		{
+			if (board[px][py] == ' ')
+			{
+				board[px][py] = 'X';      //玩家1落子记为*
+				break;
+			}
+			else{
+				printf("WRONG POS! Please input correct location!\n");
+				milli_delay(10000);
+			}
+		}
+		else{
+			printf("WRONG POS! Please input correct location!\n");
+			milli_delay(10000);
+		}
+	}
+}
+void computer_move()
+{
+	while (1)
+	{
+		int x = get_ticks() % 10;   //获取系统启动到当前的tick数，除以10取余，范围为0-9
+		int y = get_ticks() % 10;
+		if (board[x][y] == ' ')
+		{
+			board[x][y] = 'O' ;     //电脑落子记为O
+			break;
+		}
+	}
+}
+static int Is_full( int row, int col)
+{
+	int i = 0; int j = 0;
+	for (i = 0; i < row; i++)
+	{
+		for (j = 0; j < col; j++)
+		{
+			if (board[i][j] == ' ')
+				return 0;
+		}
+	}
+	return 1;
+}
+
+
+int check_win(int m,int n){
+	int tot = 1; 
+	int i,j;
+	for(i = m-1; i >= 0; i--){
+		if(board[i][n] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i = m+1; i < 10; i++){
+		if(board[i][n] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i = n-1; i >= 0; i--){
+		if(board[m][i] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i = n+1; i < 10; i++){
+		if(board[m][i] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i = m+1,j = n+1; i < 10 && j < 10; i++,j++){
+		if(board[i][j] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i =m-1,j = n+1; i >= 0 && j < 10; i--,j++){
+		if(board[i][j] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i = m-1,j = n-1; i >= 0 && j >= 0; i--,j--){
+		if(board[i][j] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	tot = 1;
+	for(i = m+1,j=n-1; i < 10 && j >= 0; i++,j--){
+		if(board[i][j] == board[m][n]){
+			tot++;
+			if(tot>=5) return 1;
+		}
+		else break;
+	}
+	return 0; //没有胜利。
+}
+
+
+char Is_win()//判断胜利条件
+{
+	for (int x = 0; x < ROWS; x++)
+	{
+		for(int y = 0; y < COLS; y++){
+			if(board[x][y]=='X'){
+				if(check_win(x,y)) return board[x][y];
+			}
+			if(board[x][y]=='O' && check_win(x,y)){
+				if(check_win(x,y)) return board[x][y];
+			}
+		}
+	}
+	if (Is_full(ROWS, COLS))
+	{
+		return 'Q';
+	}
+	return ' ';
+}
+void game(int fd_stdin, int fd_stdout)
+{
+	char ret;
+	init_board(board);
+	while (1)
+	{
+		if(player_move(fd_stdin, fd_stdout) == -1) return;           //玩家1落子
+
+		ret = Is_win();
+		if (ret!= ' ') break;
+
+		Display_board(fd_stdin, fd_stdout);           //打印棋盘
+
+		computer_move();            
+
+		ret = Is_win();
+		if (ret!= ' ') break;
+
+		Display_board(fd_stdin, fd_stdout);
+	}
+	Display_board(fd_stdin, fd_stdout);
+	if (ret == 'X'){
+		printf("******************************You Win!****************************\n");
+		milli_delay(20000);
+	}
+	else if (ret == 'O'){
+		printf("*****************************You LOSE!****************************\n");
+		milli_delay(20000);
+	}
+	else if (ret == 'Q'){
+		printf("*******************************TIED!******************************\n");
+		milli_delay(20000);
+	}
+}
+
+void menu()
+{
+	printf("############################################################################\n");
+	printf("    ####################       p:Play  q:Quit       ###################\n");           //选择游戏还是退出
+	printf("############################################################################\n");
+}
+void Game2(int fd_stdin, int fd_stdout)
+{
+	clear();
+	char input[2];
+	menu();
+
+	printf("Please input your choice:>\n");
+	read(fd_stdin, input,1);
+		
+	if(!strcmp(input,"p")){
+		game(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(input,"q")){
+		return;
+	}
+	else{
+		printf("WRONG choice!\n");
+		milli_delay(10000);
+	}
+	return 0;
+}
 
 	
 /*======================================================================*
