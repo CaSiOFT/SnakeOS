@@ -1794,15 +1794,16 @@ void TestC() {
 
 
 void help_c() {
-	printf("=============================================================================\n");
-	printf("Command List    :\n");
-	printf("1.info          : show your process information\n");
-	printf("2.create        : Create a new process\n");
-	printf("1.kill          : kill a process \n");
-	printf("4.clear         : clear the screen\n");
-	printf("5.help         : Show operation guide\n");
-	printf("6.exit         : exit the process manger \n");
-	printf("==============================================================================\n");
+	printf("———————————————————————————————————————\n");
+	printf("|————————————Command List————————————————————|\n");
+	//printf("|——————$ ps———————|—————show all process —————————|\n");
+	printf("|——————$ info——————|—————show your process information———|\n");
+	printf("|——————$ create—————|—————Create a new process ———————|\n");
+	printf("|——————$ kill——————|—————kill a process ——————————|\n");
+	printf("|——————$ clear —————|—————clear the screen —————————|\n");
+	printf("|——————$ help——————|—————Show operation guide ———————|\n");
+	printf("|——————$ exit——————|—————exit the process manger——————|\n");
+	printf("———————————————————————————————————————\n");
 }
 
 /*添加进程函数*/
@@ -1826,11 +1827,91 @@ void ProcessInfo()
 	int i;
 	for (i = 0; i < NR_TASKS + NR_PROCS; ++i)//逐个遍历
 	{
+		printf("        %d\n", proc_table[i].pid);
+		printf("           %s\n", proc_table[i].name);
+		printf("              %d\n", proc_table[i].priority);
 		if (proc_table[i].priority == 0)
-			continue;//系统资源跳过
-		printf("        %d           %s              %d            yes\n", proc_table[i].pid, proc_table[i].name, proc_table[i].priority);
+		{
+			printf("                   no\n");
+		}
+		else
+		{
+			printf("                   yes\n");
+		}
 	}
 	printf("=============================================================================\n");
+}
+void Clear()
+{
+	clear();
+	printf("                        ==================================\n");
+	printf("                                Snake Process Manager     \n");
+	printf("                                 Kernel on Orange's \n\n");
+	printf("                        ==================================\n");
+}
+void Create()
+{
+	int i;
+	for (i = 0; i < NR_TASKS + NR_PROCS; ++i)
+	{
+		if (proc_table[i].priority == 0)
+		{
+			break;
+		}
+	}
+	if (i == NR_TASKS + NR_PROCS)
+		printf("process list is full! \n");
+	else
+	{
+		i = addProcess();
+		proc_table[i].priority = 10;
+		/*	memset(proc_table[i].name, "new process", 20);*/
+			/*proc_table[i].name[0] = "new process";*/
+		printf("a new process is running!\n");
+	}
+}
+void Kill() 
+{
+	int _pid;
+	printf("Input the process-ID(you want to kill) #：");
+	char buf[70];
+	int m = read(fd_stdin, buf, 70);
+	buf[m] = 0;
+	atoi(buf, &_pid);
+	if (!strcmp(proc_table[_pid].name, "TestA")) {
+		printf("Can't killed sysytem process!\n");
+		return;
+	}
+	if (!strcmp(proc_table[_pid].name, "TestB")) {
+		printf("Can't killed sysytem process!\n");
+		return;
+	}
+	if (!strcmp(proc_table[_pid].name, "TestC")) {
+		printf("kill successful!\n");
+		return;
+	}
+	else {
+		if (proc_table[_pid].priority == 0)
+		{
+			printf("kill failed!\n");
+			return;
+		}
+		/*让其优先级为零 挂起 近似于kill*/
+		proc_table[_pid].priority = 0;
+		proc_table[_pid].name[0] = 0;
+		printf("kill successful!\n");
+		return;
+	}
+	return;
+}
+void Exit()
+{
+	clear();
+	printf("                        ==================================\n");
+	printf("                                   Xinux v1.0.0             \n");
+	printf("                                 Kernel on Orange's \n");
+	printf("                                     Welcome !\n");
+	printf("                        ==================================\n");
 }
 
 
@@ -1849,7 +1930,7 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 
 
 	while (1) {
-		printl("$ ");
+		printl("snakeOS process-manager：$ ");
 		int r = read(fd_stdin, rdbuf, 70);
 		rdbuf[r] = 0;
 
@@ -1858,11 +1939,7 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 			continue;
 		}
 		else if (!strcmp(rdbuf, "clear")) {
-			clear();
-			printf("                        ==================================\n");
-			printf("                                   Process Manager           \n");
-			printf("                                 Kernel on Orange's \n\n");
-			printf("                        ==================================\n");
+			Clear();
 			continue;
 		}
 		else if (!strcmp(rdbuf, "info")) {
@@ -1870,69 +1947,21 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 			continue;
 		}
 		else if (!strcmp(rdbuf, "create")) {
-			int i;
-			for (i = 0; i < NR_TASKS + NR_PROCS; ++i)
-			{
-				if (proc_table[i].priority == 0)
-				{
-					break;
-				}
-			}
-			if (i == NR_TASKS + NR_PROCS)
-				printf("process list is full! \n");
-			else
-			{
-				i = addProcess();
-				proc_table[i].priority = 10;
-			/*	memset(proc_table[i].name, "new process", 20);*/
-				/*proc_table[i].name[0] = "new process";*/
-				printf("a new process is running!\n");
-			}
+			Create();
 			continue;
 		}
 		else if (!strcmp(rdbuf, "kill")) {
-			int _pid;
-			printf("Input the pro-ID #");
-			char buf[70];
-			int m = read(fd_stdin, buf, 70);
-			buf[m] = 0;
-			atoi(buf, &_pid);
-			if (!strcmp(proc_table[_pid].name, "TestA")) {
-				printf("Can't killed sysytem process!\n");
-				continue;
-			}
-			if (!strcmp(proc_table[_pid].name, "TestB")) {
-				printf("Can't killed sysytem process!\n");
-				continue;
-			}
-			if (!strcmp(proc_table[_pid].name, "TestC")) {
-				printf("kill successful!\n");
-				continue;
-			}
-			else {
-				if (proc_table[_pid].priority == 0)
-				{
-					printf("kill failed!\n");
-					continue;
-				}
-				/*让其优先级为零 挂起 近似于kill*/
-				proc_table[_pid].priority = 0;
-				proc_table[_pid].name[0] = 0;
-				printf("kill successful!\n");
-				continue;
-			}
+			Kill();
+			continue;
 		}
 		else if (!strcmp(rdbuf, "exit")) {
-			clear();
-			printf("                        ==================================\n");
-			printf("                                   Xinux v1.0.0             \n");
-			printf("                                 Kernel on Orange's \n");
-			printf("                                     Welcome !\n");
-			printf("                        ==================================\n");
+			Exit();
 			return;
 		}
 		else {
-			printf("Command not found, please input help to get help!\n");
+			printf("Sorry, there no such command in the Process Manager.\n");
+			printf("You can input [help] to know more.\n");
+			printf("\n");
 			continue;
 		}
 	}
