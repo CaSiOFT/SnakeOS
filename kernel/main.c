@@ -149,10 +149,11 @@ void colorful()
 {
 	clear();
 	int j;
-	int delay_time = 8000;
+	int delay_time = 4000;
 	int start_loc = 1520;
 	disp_pos = 0;
 	for (j = 0; j < start_loc; j++) { disp_str(" "); }
+                            
 disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n",YELLOW);                                                                                                                                                      
 disp_color_str("         \n",GREEN);                                                                
 disp_color_str(" ",GREEN);disp_color_str("\n",RED);                                                                
@@ -726,7 +727,7 @@ void TestA()
 			int r = read(fd_stdin, temp, 70);
 			temp[r] = 0;
 			atoi(temp, &year);
-			Calendar(year);
+			//Calendar(year);
 			printf("\n");
 			continue;
 		}
@@ -755,12 +756,12 @@ void TestA()
 		else if (!strcmp(rdbuf, "game2"))
 		{
 
-			Game2(fd_stdin, fd_stdout);
+			//Game2(fd_stdin, fd_stdout);
 		}
                else if (!strcmp(rdbuf, "game3"))
 		{
 
-			Game3(fd_stdin, fd_stdout);
+			//Game3(fd_stdin, fd_stdout);
 		}
                else if (!strcmp(rdbuf, "game4"))
 		{
@@ -768,12 +769,12 @@ void TestA()
 			//Game4(fd_stdin, fd_stdout);
 		}
 		else if (!strcmp(rdbuf, "calcu")) {
-			calculator(fd_stdin, fd_stdout);
+			//calculator(fd_stdin, fd_stdout);
 		}
                 else if (!strcmp(rdbuf, "timer") )
 		{
 			printf("haha!");
-                        timer(fd_stdin, fd_stdout);
+                        //timer(fd_stdin, fd_stdout);
 
 		}
 		else if (strcmp(rdbuf, "cl") == 0)
@@ -812,79 +813,6 @@ calculator
 计算器生成相关函数
 *======================================================================*/
 
-//计算乘方的函数
-int Power(int A, int B) {
-	int result = 1;
-	int i;
-	for (i = 0; i < B; i++) {
-		result = A * result;
-	}
-	return result;
-}
-
-void calculator(int fd_stdin, int fd_stdout)
-{
-	int A = 0;
-	int B = 0;
-	int result = 0;    //计算结果
-	int select = 0;  //选择的选项
-	do         
-	{
-		//打印出操作界面
-		printf("--------------------\n");
-		printf("   input your choice \n");
-		printf("        1.+       \n");
-		printf("        2.-       \n");
-		printf("        3.*       \n");
-		printf("        4./       \n");
-		printf("        5.^       \n");
-		printf("        6.exit       \n");
-		printf("--------------------\n");
-
-		//输入选择
-		printf("Please input your choosed number:");
-		char temp[70];
-		int r = read(fd_stdin, temp, 70);
-		temp[r] = 0;
-		atoi(temp, &select);
-		if (select == 6) break;
-		if (select > 6) {
-			printf("Input error，please input again!\n");
-			continue;
-		}
-		
-		printf("Input your operand A and B:");
-		
-		//读取两个操作数
-		char at[70];
-		char bt[70];
-		
-		int r1 = read(fd_stdin, at, 70);
-		at[r1] = 0;
-		atoi(at, &A);
-
-		int r2 = read(fd_stdin, bt, 70);
-		bt[r2] = 0;
-		atoi(bt, &B);
-
-		if(select==1)
-			printf("%d+%d=%d\n", A, B, result = A + B);   //实现加法功能
-		else if(select==2)
-			printf("%d-%d=%d\n", A, B, result = A - B);     //实现减法功能	
-		else if(select==3)
-			printf("%d*%d=%d\n", A, B, result = A * B);      // 实现乘法功能
-		else if(select==4)
-			printf("%d/%d=%d\n", A, B, result = A / B);      //实现除法功能
-		else if(select==5)
-			printf("%d^%d=%d\n", A, B, result = Power(A,B));      //实现乘方功能
-		else
-			printf("Input error, please input again!\n");
-	} while (select);
-}
-
-
-
-
 /*======================================================================*
 Calendar
 日历生成相关函数
@@ -896,126 +824,466 @@ Calendar
 （3）判断什么时候进行换行；判断是否是闰年。
 */
 
-int f(int year, int month)  
-{
-	//如果月份<3，则f(年，月)＝年－1；否则，f(年，月)＝年
-	if (month < 3) return year - 1;
-	else return year;
-}
-
-int g(int month)  
-{
-	//如果月份<3，g(月)＝月＋13；否则，g(月)＝月＋1
-	if (month < 3) return month + 13;
-	else return month + 1;
-}
-
-
-//计算日期的N值
-int n(int year, int month, int day)  
-{	
-	//N=1461*f(年、月)/4+153*g(月)/5+日
-	return 1461L * f(year, month) / 4 + 153L * g(month) / 5 + day;
-}
-
-//利用N值算出某年某月某日对应的星期几
-int w(int year, int month, int day)
-{
-	//w=(N-621049)%7(0<=w<7)
-	return(int)((n(year, month, day) % 7 - 621049L % 7 + 7) % 7);
-}
-
-int date[12][6][7];
-
-//该数组对应了非闰月和闰月的每个月份的天数情况
-int day_month[][12] = { { 31,28,31,30,31,30,31,31,30,31,30,31 },
-{ 31,29,31,30,31,30,31,31,30,31,30,31 } };
-
-void Calendar(int year)
-{
-	int sw, leap, i, j, k, wd, day;  //leap用来判断闰年
-
-	char title[] = "SUN MON TUE WED THU FRI SAT";
-
-	sw = w(year, 1, 1);
-	leap = year % 4 == 0 && year % 100 || year % 400 == 0;  //判断闰年
-	for (i = 0; i<12; i++)
-		for (j = 0; j<6; j++)
-			for (k = 0; k<7; k++)
-				date[i][j][k] = 0;  //日期表置0
-
-	for (i = 0; i<12; i++)  //一年十二个月
-	{
-		for (wd = 0, day = 1; day <= day_month[leap][i]; day++)
-		{	//将第i＋1月的日期填入日期表
-			date[i][wd][sw] = day;
-			sw = ++sw % 7;        //每星期七天，以0至6计数
-			if (sw == 0) wd++;    //日期表每七天一行，星期天开始新的一行
-		}
-	}
-
-	printf("\n|==================The Calendar of Year %d =====================|\n|", year);
-
-	for (i = 0; i<6; i++)
-	{	//先测算第i+1月和第i+7月的最大星期数
-		for (wd = 0, k = 0; k<7; k++)//日期表的第六行有日期，则wd!=0
-			wd += date[i][5][k] + date[i + 6][5][k];
-		wd = wd ? 6 : 5;
-		printf("%2d  %s  %2d  %s |\n|", i + 1, title, i + 7, title);
-		for (j = 0; j<wd; j++)
-		{
-				printf("   ");//输出四个空白符
-				
-				//左栏为第i+1月
-				for (k = 0; k<7; k++)
-					if (date[i][j][k]) printf("%4d", date[i][j][k]);
-					else printf("    ");
-
-				printf("     ");//输出十个空白符
-
-				//右栏为第i+7月
-				for (k = 0; k<7; k++)
-					if (date[i + 6][j][k]) printf("%4d", date[i + 6][j][k]);
-					else printf("    ");
-					printf(" |\n|");
-		}
-	}
-	printf("=================================================================|\n");
-
-}
-
 /*======================================================================*
-小游戏1 猜数字
+小游戏1 文字冒险
 *======================================================================*/
-void Game1(int fd_stdin, int fd_stdout) {
-	int result = get_ticks() % 100;   //获取系统启动到当前的tick数，除以100取余，猜数字范围为0-99
-	int finish = 0;
-	int guess;
-	printf("Now the guess number game begin!\n");
-	while (!finish) {
-		printf("Please input your guess number:");
-		
-		//读取用户输入的数字
-		char temp[70];
-		int r = read(fd_stdin, temp, 70);
-		temp[r] = 0;
-		atoi(temp, &guess);
-		
-		if (guess < result) {
-			printf("Your number is small!\n");
-		}
-		else if (guess > result) {
-			printf("Your number is big!\n");
-		}
-		else {
-			printf("Congratulations! You're right!\n");
-			finish = 1;
-		}
+int GameProgress=0;
+void Game1(int fd_stdin, int fd_stdout);
+void Scene2(int fd_stdin, int fd_stdout);
+void Scene3(int fd_stdin, int fd_stdout);
+void Scene4(int fd_stdin, int fd_stdout);
+void Scene5(int fd_stdin, int fd_stdout);
+void Scene6(int fd_stdin, int fd_stdout);
+void Scene7(int fd_stdin, int fd_stdout);
+void Scene8(int fd_stdin, int fd_stdout);
+void Scene9(int fd_stdin, int fd_stdout);
 
+void Scene1(int fd_stdin, int fd_stdout){//场景1
+	char choice[2];//输入的选项
+	GameProgress=1;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("When you wake up, you find that you yourself in a broken wooden bed.\n");
+	printf("With brids singing, The sunlight came in through the window.\n");
+	milli_delay(10000);
+	printf("Yes, you are in a small broken wooden house and it's morning right now. \n");
+	printf("But you remember nothing about this place. You decide to ___\n");
+	milli_delay(10000);
+	printf("A.get up and check outside.\n");
+	printf("B.continue sleeping.\n");
+	printf("C.check around inside this house .\n");
+	
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "a")){
+		Scene2(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "b")){
+		Scene3(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "c")){
+		Scene4(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Game1(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene1(fd_stdin, fd_stdout);
 	}
 }
 
+void Scene2(int fd_stdin, int fd_stdout){//场景2
+	char choice[2];
+	GameProgress=2;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(1000);	
+	printf("When you go out, you find yourself in the forest. When you walk around, \n");
+	printf("you see a tiger. At this time, the tiger also finds you. He pours on you.\n");
+	printf("You can't escape and are eaten directly.\n");
 
+	read(fd_stdin, choice, 1);		
+	if(!strcmp(choice, "e")){
+		Scene1(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene2(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene3(int fd_stdin, int fd_stdout){//场景3
+	char choice[2];//输入的选项
+	GameProgress=3;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("Since then, you never wake up.\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "e")){
+		Scene1(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene3(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene4(int fd_stdin, int fd_stdout){//场景4
+	char choice[2];//输入的选项
+	GameProgress=4;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You look around and find that there is only one shotgun in the room.\n"); 
+	printf("You pick up the shotgun, and you decide——\n");
+	milli_delay(10000);
+	printf("A.check outside.\n");
+	printf("B.continue sleeping.\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "a")){
+		Scene5(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "b")){
+		Scene3(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene1(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene4(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene5(int fd_stdin, int fd_stdout){//场景5
+	char choice[2];//输入的选项
+	GameProgress=5;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("When you go out, you find yourself in the forest. When you walk around, \n");
+	printf("you see a tiger. At this time, the tiger also finds you. He pours on you.\n");
+	printf("Fortunately, you took out your gun in time and shot and killed the tiger.\n");
+	milli_delay(10000);
+	printf("But the gunfire is so loud that the creatures around you seem to be agitated\n");
+	printf(". You decide__\n");
+	milli_delay(10000);
+	printf("A.ingnore it and continue going.\n");
+	printf("B.Cover yourself with mud and grass and hide in the bushes.\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "a")){
+		Scene6(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "b")){
+		Scene7(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene4(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene5(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene6(int fd_stdin, int fd_stdout){//场景6
+	char choice[2];//输入的选项
+	GameProgress=6;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You feel the earth shaking regularly, and the creatures around you are \n");
+	printf("running wildly. Then a huge monster appears in your sight. It walks to the \n");
+	printf("dead tiger and roars up to the sky. \n");
+	printf("The whole forest trembles with it!\n");
+	milli_delay(10000);
+	printf("It sees you, and then it raises its huge claws and slaps you.\n");
+	printf("You react quickly and want to shoot back,\n");
+	printf("but the bullet doesn't seem to do anything to it, \n");
+	printf("and then you're torn by the sharp claws.\n");
+
+	read(fd_stdin, choice, 1);
+	
+	if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene5(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene6(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene7(int fd_stdin, int fd_stdout){//场景7
+	char choice[2];//输入的选项
+	GameProgress=7;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You feel the earth shaking regularly, and the creatures around you are \n");
+	printf("running wildly. Then a huge monster appears in your sight. It walks to the \n");
+	printf("dead tiger and roars up to the sky. \n");
+	printf("The whole forest trembles with it!\n");
+	milli_delay(10000);
+	printf("The monster looked around and didn't seem to find the murderer who was \n");
+	printf("spreading wild on its territory.\n");
+	printf("So he swallowed up the tiger's body and was ready to leave.\n");
+	printf("At this time, you find that there seems to be an obvious weakness behind it.\n");
+	printf("You decide to__\n");
+	milli_delay(10000);
+	printf("A.Shoot that weakness with a shotgun.\n");
+	printf("B.escape from it and go back to that wooden house.\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "a")){
+		Scene8(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "b")){
+		Scene9(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene6(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene7(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene8(int fd_stdin, int fd_stdout){//场景8
+	char choice[2];//输入的选项
+	GameProgress=8;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You are like a well-trained sniper. You hit the monster's heart with one shot,\n");
+	printf("and the Forest Lord fell down before he knew what was going on.\n");
+	printf("This makes you very excited, you feel the joy of victory, \n");
+	printf("seems to untie the knot for a long time. \n");
+	milli_delay(10000);
+	printf("And then fainted.\n");
+	milli_delay(10000);
+	printf("In the dark, you seem to see a glimmer of light far away, you decide to__\n");
+	milli_delay(10000);
+	printf("A.Towards the light.\n");
+	printf("B.do nothing.\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "a")){
+		Scene10(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "b")){
+		Scene11(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene7(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene8(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene9(int fd_stdin, int fd_stdout){//场景9
+	char choice[2];//输入的选项
+	GameProgress=9;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You go back to the cabin and think about what happened just now.\n");
+	milli_delay(10000);
+	printf("You fall asleep and never wake up again\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene7(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene9(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene10(int fd_stdin, int fd_stdout){//场景10
+	char choice[2];//输入的选项
+	GameProgress=10;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You rush to the light at all costs, in your sleep, vaguely hear the familiar voice.\n");
+	milli_delay(10000);
+	printf("They're your family, you remember, they're surprised, they're crying.\n");
+	milli_delay(10000);
+	printf("You remember everything.\n");
+	printf("You used to be a soldier on the battlefield\n");
+	printf("and lost consciousness in an explosion,They say you've become a vegetable, \n");
+	printf("but you've finally untied the knot and you've finally come to life.\n");
+	milli_delay(20000);
+	printf("                     At least, you think you're waking up now...              \n");
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene8(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene10(fd_stdin, fd_stdout);
+	}
+}
+
+void Scene11(int fd_stdin, int fd_stdout){//场景11
+	char choice[2];//输入的选项
+	GameProgress=11;
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game. \n");
+	printf("Press a,b... to input your choice!\n");
+	printf("Press e to go back\n");
+	printf("==============================================================================\n");
+	milli_delay(10000);	
+	printf("You give up the light and sleep in the dark forever.\n");
+	
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "q")){
+		return;
+	}
+	else if(!strcmp(choice, "e")){
+		Scene8(fd_stdin, fd_stdout);
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Scene11(fd_stdin, fd_stdout);
+	}
+}
+
+void Game1(int fd_stdin, int fd_stdout){
+	char choice[2];//输入的选项
+    //欢迎与说明
+	clear();
+	printf("==============================================================================\n");
+	printf("Press q to quit the game.\n");
+	printf("Press c to continue your last rate of progress.\n");
+	printf("Press s and let's start adv!\n");
+	printf("===============================================================================\n");
+
+	read(fd_stdin, choice, 1);
+	if(!strcmp(choice, "s")){
+		Scene1(fd_stdin, fd_stdout);
+	}
+	else if(!strcmp(choice, "q")){
+		printf("Game Over!\n");
+		return;
+	}
+	else if(!strcmp(choice, "c")){//读档
+		if(GameProgress==0){
+			printf("There is no record of GameProgress! Why not start now?\n");
+			Game1(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==1){
+			Scene1(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==2){
+			Scene2(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==3){
+			Scene3(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==4){
+			Scene4(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==5){
+			Scene5(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==6){
+			Scene6(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==7){
+			Scene7(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==8){
+			Scene8(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==9){
+			Scene9(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==10){
+			Scene10(fd_stdin, fd_stdout);
+		}
+		else if(GameProgress==11){
+			Scene11(fd_stdin, fd_stdout);
+		}
+	}
+	else {
+		printf("I don't know what's the meaning of this. How about check the board up there?\n");
+		milli_delay(50000);
+		Game1(fd_stdin, fd_stdout);
+	}
+	printf("Game Over!");
+}
 /*======================================================================*
 小游戏2 
 贪吃蛇
@@ -1027,257 +1295,10 @@ void Game1(int fd_stdin, int fd_stdout) {
 	→y
 */
 
-	char GameMap[H][L];//游戏地图
-	int sum = 1;//蛇的长度
-	int over = 0;//判断游戏是否结束
-
-	int  dx[4] = { 0, 0, -1, 1 };  //左、右、上、下的方向
-	int  dy[4] = { -1, 1, 0, 0 };
-	struct Snake
-	{
-		int x, y;
-		int now;  //当前节点方向，0 左,1右，2上，3下
-	}Snake[H*L];
-	/*依次为蛇头，蛇身，食物，地图上的普通点*/
-	char Shead = '@';
-	char Sbody = '#';
-	char Sfood = '*';
-	char Snode = '.';
-
-	/*生成食物函数*/
-	void CreateFood() {
-		int x, y;
-		while (1) {
-			x = get_ticks() % H;
-			y = get_ticks() % L;
-
-			if (GameMap[x][y] == '.') {//只能出现在地图上的普通点位置
-				GameMap[x][y] = Sfood;
-				break;
-			}
-		}
-	}
-
-
-	/*变长以及判死条件*/
-	void HeadTail(int x, int y) {
-		if (GameMap[Snake[0].x][Snake[0].y] == '.')  //为空
-			GameMap[Snake[0].x][Snake[0].y] = '@';
-		else
-			if (GameMap[Snake[0].x][Snake[0].y] == '*')  //为食物
-			{
-				GameMap[Snake[0].x][Snake[0].y] = '@';
-				//增加蛇身体长度
-				Snake[sum].x = x;
-				Snake[sum].y = y;
-				Snake[sum].now = Snake[0].now;
-				GameMap[Snake[sum].x][Snake[sum].y] = '#';
-				sum++;
-				CreateFood();  //产生食物
-			}
-			else
-				over = 1;
-	}
-
-	void Border() {
-		if (Snake[0].x < 0 || Snake[0].x >= H
-			|| Snake[0].y < 0 || Snake[0].y >= L)
-			over = 1;
-	}
-
-	/*蛇移动*/
-	void Move() {
-		int temp = sum;
-		int i, x, y;
-		x = Snake[0].x;
-		y = Snake[0].y;
-		GameMap[x][y] = '.';
-		/*开始移动*/
-		Snake[0].x = Snake[0].x + dx[Snake[0].now];
-		Snake[0].y = Snake[0].y + dy[Snake[0].now];
-		Border();//判越界
-		HeadTail(x, y);
-		/*printf("sum %d \n", sum);*/
-		if (sum == temp) {
-			//未吃到食物,蛇整体移动
-			for (i = 1; i < sum; i++) {
-				if (i == 1)//尾节点设置为空
-					GameMap[Snake[i].x][Snake[i].y] = '.';
-				if (i == sum - 1)//离蛇头最近的节点
-				{
-					Snake[i].x = x;
-					Snake[i].y = y;
-					Snake[i].now = Snake[0].now;
-				}
-				else {
-					//其他普通蛇身借点只需往前走一步即可
-					Snake[i].x = Snake[i + 1].x;
-					Snake[i].y = Snake[i + 1].y;
-					Snake[i].now = Snake[i + 1].now;
-				}
-				GameMap[Snake[i].x][Snake[i].y] = '#'; //移动后赋值为蛇身 
-			}
-
-		}
-		/*printf("snake[0].x %d  snake[0].y %d\n", Snake[0].x, Snake[0].y);*/
-	}
-
-
-	/*按钮函数*/
-	void Button(int fd_stdin, int fd_stdout) {
-		char ch[2];
-		/*printf("amount %d      kbmount", amount, kb_in.count);*/
-		//if (amount != kb_in.count) {
-			/*while (1) {*/
-		read(fd_stdin, ch, 1);
-		/*printf("button= %s \n", *ch);*/
-		if (!strcmp(ch, "a")) {
-			Snake[0].now = 0;
-			return;
-		}
-		else if (!strcmp(ch, "d")) {
-			Snake[0].now = 1;
-			return;
-		}
-		else if (!strcmp(ch, "w")) {
-			Snake[0].now = 2;
-			return;
-		}
-		else if (!strcmp(ch, "s")) {
-			Snake[0].now = 3;
-			return;
-		}
-		else
-			return;
-		//}
-	}
-		//}
-
-
-
-
-	/*地图初始化函数*/
-	void Initial(int fd_stdin, int fd_stdout) {
-		int hx, hy;
-		int i, j;
-		memset(GameMap, '.', sizeof(GameMap));//使地图上的所有点为普通点
-		clear();
-		hx = get_ticks() % H;
-		hy = get_ticks() % L;
-		/*初始化蛇*/
-		GameMap[hx][hy] = Shead;
-		Snake[0].x = hx;
-		Snake[0].y = hy;
-		Snake[0].now = -1;
-		CreateFood();
-
-
-		printf("==================================\n");
-		printf("Greedy Snake           \n");
-		printf("Welcome !\n");
-		printf("==================================\n");
-
-		printf("Press any key to start\n");
-
-		for (i = 0; i < H; i++) {
-			for (j = 0; j < L; j++) {
-				printf("%c", GameMap[i][j]);
-			}
-			printf("\n");
-		}
-
-		char ch;
-		read(fd_stdin, ch, 1);
-		/*printf("initial %s\n", ch);*/
-		Button(fd_stdin, fd_stdout);
-		/*printf("snake[0].now %d", Snake[0].now);*/
-	}
-
-
-
-	void Game2(int fd_stdin, int fd_stdout) {
-		Initial(fd_stdin, fd_stdout);
-		int i, j;
-		while (1) {
-			/*printf("i am delaying");*/
-			delay(10);
-			/*printf("i am delayed");*/
-			Button(fd_stdin, fd_stdout);
-			/*printf("i am buttoned");
-			printf("snake[0].now %d", Snake[0].now);*/
-			Move();
-			/*printf("move\n");*/
-
-			if (over) {
-				printf("\n Game over!\n");
-				return;
-			}
-
-			clear();
-
-			printf("==================================\n");
-			printf("Greedy Snake           \n");
-			printf("Welcome !\n");
-			printf("==================================\n");
-
-			printf("Press any key to start\n");
-
-
-			for (i = 0; i < H; i++)
-			{
-				for (j = 0; j < L; j++)
-					printf("%c", GameMap[i][j]);
-				printf("\n");
-			}
-
-		}
-	}
+	
 /*======================================================================*
                             Timer
  *======================================================================*/
-void timer(int fd_stdin,int fd_stdout)
-{
-clear();
-printf("\n \n ");     
-printf("          Please set your timer !(NOTICE: the unit is second!^.^)\n");
-		char rdbuf[128];
-		int tmp = 0;
-		int r = read(fd_stdin, rdbuf, 70);
-		rdbuf[r] = 0;
-		atoi(rdbuf,&tmp);
-
-		int i = tmp;
-		printf("the time you set is %d\nNow begin....\n",tmp);
-		for(;i >=0;i--){
-			printf("%d left\n",i);
-			milli_delay(10000);
-		}
-		printf("Time up!\n");
-printf(" ...  ..............************.......... \n");             
-printf("        ...  .........]/@@@@@@@@@@@@@@@Oo\`*........\n");           
-printf("            ......,/@@@@@[`........,[@@@@@@Oo\**... .\n");          
-printf("       .... ..../@@@@`.......=@@@^......,\@@@@Oo]*.... .   \n");    
-printf("       ......./@@@`..........=@@@O.........,@@@@OO^*..... \n");     
-printf("       .....,@@@`./@^........=@@@O.......,@@.,@@@@Oo`.... \n");     
-printf("       ...=@@/......,@@^.....=@@@O....=@@/......\@@@@O\*.. \n");    
-printf("       ..*@@@........  ......=@@@O...............@@@@@O^*... \n");  
-printf("      ...=@@`....       .....=@@@O.......    ....,@@@@OO`..\n");    
-printf("    . ..*@@@........   ......=@@@O................@@@@@O\*..\n");   
-printf("     ...*@@/.@@@@@@^   .....=@@@@@@@@@@@\`=@@@@@@.=@@@@Oo*..  \n"); 
-printf("     ...*@@@.,[[[[[.    ....=@@@@@@@@@@@@O.[[[[[`./@@@@Oo*.. \n");  
-printf("     ...*@@@........   ......,OOO/[*****....   ...@@@@@Oo*..   \n");
-printf("      ..*O@@^....   ........................   ..=@@@@@Oo*..   \n");
-printf("      ..*=@@@`...   .,]................]`...   .,@@@@@@O^...   \n");
-printf("    . ...*\@@@`....,@@@`.......... ...,@@@`....,@@@@@@Oo*...   \n");
-printf("       ...,o@@@^..@@@^...   ..]]........,@@@..=@@@@@@Oo*....   \n");
-printf("       ....,o@@@@`.......   .=@@^.     .....,@@@@@@@Oo`... .   \n");
-printf("       .....*\O@@@@]....    .=@@^.     ...]@@@@@@@@Oo*....     \n");
-printf("       ......*=OO@@@@@\`......@@`.....,/@@@@@@@@@OO`*...       \n");
-printf("           ....*[OO@@@@@@@@@@\\]/@@@@@@@@@@@@@@OO^*.....       \n");
-printf("               .....*,\oOOO@@@@@@@@@@@@OOOo/`*......           \n");
-printf("               .... ....**,[[oooooooo/[`**......               \n");
-
-}
 
 /*======================================================================*
 game3                              WHO IS BIGGER
@@ -1289,84 +1310,6 @@ Otherwise B(A) wins and get 100points.
 TOTAL 3 ROUNDS
 THE HIGHER SCORE WINS FINALLY.
  *======================================================================*/
-void Game3(int fd_stdin, int fd_stdout) {
-	
-	int finish = 0;
-        int a,b,max;
-        int score_A,score_B;
-        score_A=0;
-        score_B=0;
-	while (finish!=3) {
-
-              printf("Referee shows the max input number please.");
-
- //读取caipan输入的数字
-		char RAND_MAX[70];
-		int r = read(fd_stdin, RAND_MAX, 70);
-		RAND_MAX[r] = 0;
-		atoi(RAND_MAX, &max);
-
-              printf("Now please input your number respectively\n");
-              clear();
-              printf("The max input number is %d \n",max);
-              printf("Please input your number(A):");
-//读取用户A输入的数字
-		char A[70];
-		int rA = read(fd_stdin, A, 70);
-		A[rA] = 0;
-		atoi(A, &a);
-                while(a>max)
-                {
-                 printf("Input Error.\n Please input your number(A) again:");
-		char A[70];
-		int rA = read(fd_stdin, A, 70);
-		A[rA] = 0;
-		atoi(A, &a);
-                }
-                clear();
-              printf("The max input number is %d \n",max);
-                printf("Please input your number(B):");
-//读取用户B输入的数字
-		char B[70];
-		int rB = read(fd_stdin, B, 70);
-		B[rB] = 0;
-		atoi(B, &b);
-                
-                 while(b>max)
-                {
-                 printf("Input Error.\n Please input your number(B) again:");
-		char B[70];
-		int rB = read(fd_stdin, B, 70);
-		B[rB] = 0;
-		atoi(B, &b);
-                }
-               
-		if (a < b&& a<b-5) {
-			printf("This round A wins!\n");
-                        score_A+=100;
-                        
-		}
-		else if (a < b&& a>b-5) {
-			printf("This round B wins!\n");
-                        score_B+=100;
-		}
-		else if (a > b&& a>b-5) {
-			printf("This round B wins!\n");
-                        score_B+=100;
-		}
-                else if (a > b&& a<b-5) {
-			printf("This round A wins!\n");
-                        score_A+=100;
-		}
-                finish++;
-             
-	}
-        if(score_A>score_B)
-        printf("A is the winner!\n");
-        else
-        printf("B is the winner!\n");
-}
-
 
 /*======================================================================*
                                TestB
@@ -1794,16 +1737,15 @@ void TestC() {
 
 
 void help_c() {
-	printf("———————————————————————————————————————\n");
-	printf("|————————————Command List————————————————————|\n");
-	//printf("|——————$ ps———————|—————show all process —————————|\n");
-	printf("|——————$ info——————|—————show your process information———|\n");
-	printf("|——————$ create—————|—————Create a new process ———————|\n");
-	printf("|——————$ kill——————|—————kill a process ——————————|\n");
-	printf("|——————$ clear —————|—————clear the screen —————————|\n");
-	printf("|——————$ help——————|—————Show operation guide ———————|\n");
-	printf("|——————$ exit——————|—————exit the process manger——————|\n");
-	printf("———————————————————————————————————————\n");
+	printf("=============================================================================\n");
+	printf("Command List    :\n");
+	printf("1.info          : show your process information\n");
+	printf("2.create        : Create a new process\n");
+	printf("1.kill          : kill a process \n");
+	printf("4.clear         : clear the screen\n");
+	printf("5.help         : Show operation guide\n");
+	printf("6.exit         : exit the process manger \n");
+	printf("==============================================================================\n");
 }
 
 /*添加进程函数*/
@@ -1827,91 +1769,11 @@ void ProcessInfo()
 	int i;
 	for (i = 0; i < NR_TASKS + NR_PROCS; ++i)//逐个遍历
 	{
-		printf("        %d\n", proc_table[i].pid);
-		printf("           %s\n", proc_table[i].name);
-		printf("              %d\n", proc_table[i].priority);
 		if (proc_table[i].priority == 0)
-		{
-			printf("                   no\n");
-		}
-		else
-		{
-			printf("                   yes\n");
-		}
+			continue;//系统资源跳过
+		printf("        %d           %s              %d            yes\n", proc_table[i].pid, proc_table[i].name, proc_table[i].priority);
 	}
 	printf("=============================================================================\n");
-}
-void Clear()
-{
-	clear();
-	printf("                        ==================================\n");
-	printf("                                Snake Process Manager     \n");
-	printf("                                 Kernel on Orange's \n\n");
-	printf("                        ==================================\n");
-}
-void Create()
-{
-	int i;
-	for (i = 0; i < NR_TASKS + NR_PROCS; ++i)
-	{
-		if (proc_table[i].priority == 0)
-		{
-			break;
-		}
-	}
-	if (i == NR_TASKS + NR_PROCS)
-		printf("process list is full! \n");
-	else
-	{
-		i = addProcess();
-		proc_table[i].priority = 10;
-		/*	memset(proc_table[i].name, "new process", 20);*/
-			/*proc_table[i].name[0] = "new process";*/
-		printf("a new process is running!\n");
-	}
-}
-void Kill() 
-{
-	int _pid;
-	printf("Input the process-ID(you want to kill) #：");
-	char buf[70];
-	int m = read(fd_stdin, buf, 70);
-	buf[m] = 0;
-	atoi(buf, &_pid);
-	if (!strcmp(proc_table[_pid].name, "TestA")) {
-		printf("Can't killed sysytem process!\n");
-		return;
-	}
-	if (!strcmp(proc_table[_pid].name, "TestB")) {
-		printf("Can't killed sysytem process!\n");
-		return;
-	}
-	if (!strcmp(proc_table[_pid].name, "TestC")) {
-		printf("kill successful!\n");
-		return;
-	}
-	else {
-		if (proc_table[_pid].priority == 0)
-		{
-			printf("kill failed!\n");
-			return;
-		}
-		/*让其优先级为零 挂起 近似于kill*/
-		proc_table[_pid].priority = 0;
-		proc_table[_pid].name[0] = 0;
-		printf("kill successful!\n");
-		return;
-	}
-	return;
-}
-void Exit()
-{
-	clear();
-	printf("                        ==================================\n");
-	printf("                                   Xinux v1.0.0             \n");
-	printf("                                 Kernel on Orange's \n");
-	printf("                                     Welcome !\n");
-	printf("                        ==================================\n");
 }
 
 
@@ -1930,7 +1792,7 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 
 
 	while (1) {
-		printl("snakeOS process-manager：$ ");
+		printl("$ ");
 		int r = read(fd_stdin, rdbuf, 70);
 		rdbuf[r] = 0;
 
@@ -1939,7 +1801,11 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 			continue;
 		}
 		else if (!strcmp(rdbuf, "clear")) {
-			Clear();
+			clear();
+			printf("                        ==================================\n");
+			printf("                                   Process Manager           \n");
+			printf("                                 Kernel on Orange's \n\n");
+			printf("                        ==================================\n");
 			continue;
 		}
 		else if (!strcmp(rdbuf, "info")) {
@@ -1947,21 +1813,69 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 			continue;
 		}
 		else if (!strcmp(rdbuf, "create")) {
-			Create();
+			int i;
+			for (i = 0; i < NR_TASKS + NR_PROCS; ++i)
+			{
+				if (proc_table[i].priority == 0)
+				{
+					break;
+				}
+			}
+			if (i == NR_TASKS + NR_PROCS)
+				printf("process list is full! \n");
+			else
+			{
+				i = addProcess();
+				proc_table[i].priority = 10;
+			/*	memset(proc_table[i].name, "new process", 20);*/
+				/*proc_table[i].name[0] = "new process";*/
+				printf("a new process is running!\n");
+			}
 			continue;
 		}
 		else if (!strcmp(rdbuf, "kill")) {
-			Kill();
-			continue;
+			int _pid;
+			printf("Input the pro-ID #");
+			char buf[70];
+			int m = read(fd_stdin, buf, 70);
+			buf[m] = 0;
+			atoi(buf, &_pid);
+			if (!strcmp(proc_table[_pid].name, "TestA")) {
+				printf("Can't killed sysytem process!\n");
+				continue;
+			}
+			if (!strcmp(proc_table[_pid].name, "TestB")) {
+				printf("Can't killed sysytem process!\n");
+				continue;
+			}
+			if (!strcmp(proc_table[_pid].name, "TestC")) {
+				printf("kill successful!\n");
+				continue;
+			}
+			else {
+				if (proc_table[_pid].priority == 0)
+				{
+					printf("kill failed!\n");
+					continue;
+				}
+				/*让其优先级为零 挂起 近似于kill*/
+				proc_table[_pid].priority = 0;
+				proc_table[_pid].name[0] = 0;
+				printf("kill successful!\n");
+				continue;
+			}
 		}
 		else if (!strcmp(rdbuf, "exit")) {
-			Exit();
+			clear();
+			printf("                        ==================================\n");
+			printf("                                   Xinux v1.0.0             \n");
+			printf("                                 Kernel on Orange's \n");
+			printf("                                     Welcome !\n");
+			printf("                        ==================================\n");
 			return;
 		}
 		else {
-			printf("Sorry, there no such command in the Process Manager.\n");
-			printf("You can input [help] to know more.\n");
-			printf("\n");
+			printf("Command not found, please input help to get help!\n");
 			continue;
 		}
 	}
