@@ -1692,293 +1692,36 @@ void help_b() {
 }
 
 /*======================================================================*
-文件操作相关函数
-*======================================================================*/
-
-void makepath()
-{
-	printf("\\root");
-	if(current != root) {
-		struct Directory* p = root->child;
-		while(p != current->child) {
-			printf("\\%s", p->name);
-			p = p->child;
-		}
-	}
-}
-
-void initDirectory(struct Directory *p)
-{
-	p->child = 0;
-	p->link = 0;
-	p->next = 0;
-	p->parent = 0;
-}
-
-void initFile(struct File *p)
-{
-	p->next = 0;
-}
-
-int createDirectory(char* file_name)
-{
-	struct Directory* p = current->child;
-	if (p == 0) {
-		current->child = &D[Dpos];
-		Dpos++;
-		initDirectory(current->child);
-		p = current->child;
-	}
-	else {
-		while (p->next != 0) p = p->next;
-		p->next = &D[Dpos];
-		Dpos++;
-		initDirectory(p->next);
-		p = p->next;
-	}
-	p->parent = current;
-	strcpy(p->name, file_name);
-	printf("Directory create successful: %s\n", file_name);
-}
-
-int createFile(char* file_name) 
-{
-	int fd;
-	fd = open(file_name, O_CREAT | O_RDWR);
-	if(fd == -1){
-		printf("Create file failed! the file has been existed.\n");
-		return -1;
-	}
-
-	struct File* p = current->link;
-	if (p == 0) {
-		current->link = &F[Fpos];
-		Fpos++;
-		initFile(current->link);
-		p = current->link;
-	}
-	else {
-		while (p->next != 0) p = p->next;
-		p->next = &F[Fpos];
-		Fpos++;
-		initFile(p->next);
-		p = p->next;
-	}
-	strcpy(p->name, file_name);
-	
-	char buf[128];
-	buf[0] = 0;
-	write(fd, buf, 1);
-	printf("File create successful: %s (fd %d)\n", file_name, fd);
-	close(fd);
-	return 1;
-}
-
-int inCurrentF(char* file_name)
-{
-	struct File* p = current->link;
-	while(p != 0){
-		if(strcmp(p->name, file_name) == 0){
-			return 1;
-		}
-		p = p->next;
-	}
-	return 0;
-}
-
-int inCurrentD(char* file_name)
-{
-	struct Directory* p = current->child;
-	while(p != 0){
-		if(strcmp(p->name, file_name) == 0){
-			return 1;
-		}
-		p = p->next;
-	}
-	return 0;
-}
-
-int readFile(char* file_name) 
-{
-	int fd;
-	fd = open(file_name, O_RDWR);
-	if (fd ==-1) {
-		printf("Open file failed! please check the filename \n");
-		return -1;
-	}
-	if(!inCurrentF(file_name)) {
-		printf("Open file failed! it isn't in current directory \n");
-		return -1;
-	}
-
-	char buf[1024];
-	int n = read(fd, buf, 1024);
-	printf("%s\n", buf);
-	close(fd);
-	return 1;
-}
-
-int writeFile(char* file_name,int fd_stdin) 
-{
-	int fd;
-	fd = open(file_name, O_RDWR);
-	if (fd == -1)
-	{
-		printf("Open file failed! please check the filename \n");
-		return -1;
-	}
-	if(!inCurrentF(file_name)) {
-		printf("Open file failed! it isn't in current directory \n");
-		return -1;
-	}
-
-	char buf[128];
-	int r = read(fd_stdin, buf, 80);
-	buf[r] = 0;
-
-	int m = write(fd, buf, r+ 1);
-	close(fd);
-	return 1;
-}
-
-int deleteFile(char* file_name) 
-{
-	if(!inCurrentF(file_name)) {
-		printf("Delete file failed! it isn't in current directory \n");
-		return -1;
-	}
-	struct File* p = current->link;
-	struct File* q = p;
-	while(strcmp(p->name, file_name) != 0) p = p->next;
-	if(p == current->link) current->link = p->next;
-	else {
-		while(q->next != p) q = q->next;
-		q->next = p->next;
-	}
-
-	int r = unlink(file_name);
-	if (r == 0)
-	{
-		printf("File delete successful!\n");
-		return 1;
-	}
-	else
-	{
-		printf("Delete file failed! Please check the fileaname!\n");
-		return -1;
-	}
-}
-
-void clearFile(struct Directory* d, struct File* f)
-{
-	if (d->link == f) {
-		d->link = f->next;
-	}
-	else {
-		struct File* p = d->link;
-		while (p->next != f) p = p->next;
-		p->next = f->next;
-	}
-	int r = unlink(f->name);
-}
-
-void Clear(struct Directory* x)
-{
-	while (x->link != 0) clearFile(x, x->link);
-	while (x->child!= 0) {
-		struct Directory* p = x->child;
-		x->child = p->next;
-		Clear(p);
-	}
-}
-
-int deleteDirectory(char* file_name)
-{
-	if(!inCurrentD(file_name)) {
-		printf("Delete directory failed! it isn't in current directory \n");
-		return -1;
-	}
-	struct Directory* p = current->child;
-	while (p != 0) {
-		if (strcmp(p->name, file_name) == 0) break;
-		p = p->next;
-	}
-	if (p == current->child) current->child = p->next;
-	else {
-		struct Directory* q = current->child;
-		while (q->next != p) q = q->next;
-		q->next = p->next;
-	}
-	Clear(p);
-	printf("Directory delete successful!\n");
-	return 1;
-}
-
-int EnterChildDirectory(char* file_name)
-{
-	if(!inCurrentD(file_name)) {
-		printf("Enter directory failed! it isn't in current directory \n");
-		return -1;
-	}
-	struct Directory* p = current->child;
-	while(strcmp(p->name, file_name) != 0) p = p->next;
-	current = p;
-	printf("Enter directory successfully!\n");
-	return 1;
-}
-
-int BackParentsDirectory()
-{
-	if(current == root){
-		printf("root has no parents directory!\n");
-		return -1;
-	}
-	else{
-		current = current->parent;
-		printf("Back parents directory successfully!\n");
-		return 1;
-	}
-}
-
-void displayCurrentDirectory()
-{
-	if(current->link == 0 && current->child == 0)
-		printf("NOTHING!\n");
-	else{
-		struct Directory* p = current->child;
-		struct File* q = current->link;
-		while(p != 0) {
-			printf("Floader: %s\n", p->name);
-			p = p->next;
-		}
-		while(q != 0) {
-			printf("File: %s\n", q->name);
-			q = q->next;
-		}
-	}
-}
-
-void TestC() {
-	while (1) {
-
-	}
-}
-/*======================================================================*
 								ProcessManager
 								进程任务管理
 *======================================================================*/
 
-
+void Processhomepage()
+{
+	clear();
+	printf("      ====================================================================\n");
+	printf("      ||                           SnakeOS For You                      ||\n");
+	printf("      ====================================================================\n");
+	printf("      ||                              Welcome to                        ||\n");
+	printf("      ||                           Process Manager                      ||\n");
+	printf("      ||                                                                ||\n");
+	printf("      ||                                                                ||\n");
+	printf("      ||                              Enter:help                        ||\n");
+	printf("      ||                           Get command list                     ||\n");
+	printf("      ====================================================================\n");
+}
 void help_c() {
-	printf("=============================================================================\n");
-	printf("Command List    :\n");
-	printf("1.info          : show your process information\n");
-	printf("2.create        : Create a new process\n");
-	printf("1.kill          : kill a process \n");
-	printf("4.clear         : clear the screen\n");
-	printf("5.help         : Show operation guide\n");
-	printf("6.exit         : exit the process manger \n");
-	printf("==============================================================================\n");
+	printf("====================================================================\n");
+	printf("|-------------------------SnakeOS For You--------------------------|\n");
+	printf("|--------------------process system command list-------------------|\n");
+	printf("|------------------------------------------------------------------|\n");
+	printf("|-------1.show-------|-------Show your process information---------|\n");
+	printf("|-------2.restart----|-------Restart a process---------------------|\n");
+	printf("|-------3.kill-------|-------Kill a process------------------------|\n");
+	printf("|-------4.clear------|-------Clear the screen----------------------|\n");
+	printf("|-------5.help-------|-------Show process system command list------|\n");
+	printf("|-------6.quit-------|-------Quit the process manger---------------|\n");
+	printf("====================================================================\n");
 }
 
 /*添加进程函数*/
@@ -1992,118 +1735,214 @@ int addProcess()
 	}
 	return i;
 }
-/*查看系统内运行情况*/
-void ProcessInfo()
+/*结束进程*/
+void kill_p1(int fd_stdin)
 {
-	printf("=============================================================================\n");
-	printf("      PID      |    name       | priority    | running?\n");
-	//进程号，进程名，优先级，是否是系统进程，是否在运行
-	printf("-----------------------------------------------------------------------------\n");
-	int i;
-	for (i = 0; i < NR_TASKS + NR_PROCS; ++i)//逐个遍历
-	{
-		if (proc_table[i].priority == 0)
-			continue;//系统资源跳过
-		printf("        %d           %s              %d            yes\n", proc_table[i].pid, proc_table[i].name, proc_table[i].priority);
+	int _pid;
+	printf("Input the ID(you want to kill): ");
+	char cstr[60];
+	int par = read(fd_stdin, cstr, 60);
+	cstr[par] = 0;
+	atoi(cstr, &_pid);
+	if (!strcmp(proc_table[_pid].name, "TestA")) {
+		printf("Can't killed sysytem process!\n");
+		return;
 	}
-	printf("=============================================================================\n");
+	if (!strcmp(proc_table[_pid].name, "TestB")) {
+		printf("Can't killed sysytem process!\n");
+		return;
+	}
+	if (!strcmp(proc_table[_pid].name, "TestC")) {
+		proc_table[_pid].priority = 0;
+		printf("kill successful!\n");
+		return;
+	}
+	else {
+		if (proc_table[_pid].priority == 0)
+		{
+			printf("kill failed!\n");
+			return;
+		}
+		/*让其优先级为零 挂起 近似于kill*/
+		proc_table[_pid].priority = 0;
+		//proc_table[_pid].name[0] = 0;
+		printf("kill successful!\n");
+		return;
+	}
 }
 
+//结束进程
+void kill_p(int fd_stdin)
+{
+	int p_pid;
+	printf("Input the ID(you want to kill): ");
+	char cstr[60];
+	int par = read(fd_stdin, cstr, 60);
+	cstr[par] = 0;
+	atoi(cstr, &p_pid);
+
+	//健壮性处理以及结束进程
+	if (p_pid >= NR_TASKS + NR_PROCS || p_pid < 0)
+	{
+		printf("The PID out of the range\n");
+		return;
+	}
+	else {
+		if (p_pid == 4 || p_pid == 5)
+		{
+			printf("Cannot kill this process!please retry\n");
+			return;
+		}
+		else {
+			if (p_pid == 6)
+			{
+				proc_table[p_pid].priority = 0;
+				printf("Successful!you killed this process\n");
+					//return;
+			}
+			else {
+				if (proc_table[p_pid].priority == 0)
+				{
+					printf("Kill failed!the process has been killed\n");
+					return;
+				}
+				proc_table[p_pid].priority = 0;
+				printf("Successful!you killed this task\n");
+			}
+		}
+	}
+	show_p();
+}
+/*重启进程*/
+void restart_p1()
+{
+	int i;
+	for (i = 0; i < NR_TASKS + NR_PROCS; i++)
+	{
+		if (proc_table[i].priority == 0)
+		{
+			break;
+		}
+	}
+	if (i == NR_TASKS + NR_PROCS)
+		printf("process list is full! \n");
+	else
+	{
+		proc_table[i].priority = 10;
+		/*	memset(proc_table[i].name, "new process", 20);*/
+			/*proc_table[i].name[0] = "new process";*/
+		printf("a new process is running!\n");
+	}
+}
+void restart_p(int fd_stdin)
+{
+	int id;
+	printf("Input the ID(you want to restart): ");
+	char cstr[10];
+		int par=read(fd_stdin, cstr,10);
+		cstr[par] = 0;
+		atoi(cstr, &id);
+	if (id >= NR_TASKS + NR_PROCS || id < 0)
+	{
+		printf("The pid out of the range\n");
+		return;
+	}else if (proc_table[id].priority == 0)
+		{
+			proc_table[id].priority = 10;
+			printf("Restart successful!\n");
+			return;
+		}
+		else {
+			printf("The process is running!No need to restart\n");
+		}
+	show_p();
+}
+/*查看系统内运行情况*/
+void show_p()
+{
+	printf("========================================================================\n");
+	printf("*     PID      |       Name     |    Priority    |    Running?         *\n");
+	//进程号，进程名，优先级，是否是系统进程，是否在运行
+	printf("========================================================================\n");
+	for (int i = 0; i < NR_TASKS + NR_PROCS; ++i)//逐个遍历
+	{
+		printf("        %d", proc_table[i].pid);
+		printf("              %s", proc_table[i].name);
+		if (proc_table[i].priority == 0) {
+			if (i == 0 || i == 1) {
+				printf("                  %d", proc_table[i].priority);
+			}
+			else if (i == 2 || i == 3) {
+				printf("                   %d", proc_table[i].priority);
+			}
+			else if (i == 6) {
+				printf("                %d", proc_table[i].priority);
+			}
+		}else if (i == 2 || i==3) {
+			printf("                  %d", proc_table[i].priority);
+		}
+		else if (i == 4 || i == 5 || i == 6) {
+			printf("                %d", proc_table[i].priority);
+		}
+		else printf("                 %d", proc_table[i].priority);
+		if (proc_table[i].priority != 0)
+		{
+			printf("             yes\n");
+		}
+		else
+		{
+			printf("             no\n");
+		}
+		/*if (proc_table[i].priority == 0)
+			continue;//系统资源跳过
+		printf("        %d           %s              %d            yes\n", proc_table[i].pid, proc_table[i].name, proc_table[i].priority);
+*/	}
+	printf("========================================================================\n");
+}
+void wrongCommond()
+{
+	printf("Wrong command.you can input help to get the command list\n");
+	printf("please retry!\n");
+	return;
+}
 
 
 void ProcessManager(int fd_stdin,int fd_stdout)
 {
-	int i, n;
-
-	char rdbuf[128];
-
-	clear();
-	printf("                        ==================================\n");
-	printf("                                   Process Manager           \n");
-	printf("                                  Based on Orange's \n\n");
-	printf("                        ==================================\n");
-
-
+	int i;
+	char readbuf[128];
+	Processhomepage();
 	while (1) {
-		printl("$ ");
-		int r = read(fd_stdin, rdbuf, 70);
-		rdbuf[r] = 0;
+		printf("SnakeOS for you: $ ");
+		int r = read(fd_stdin, readbuf, 70);
+		readbuf[r] = 0;
 
-		if (!strcmp(rdbuf, "help")) {
+		if (strcmp(readbuf, "help") == 0) {
 			help_c();
 			continue;
 		}
-		else if (!strcmp(rdbuf, "clear")) {
+		else if (strcmp(readbuf, "clear") == 0) {
+			Processhomepage();
+			continue;
+		}
+		else if (strcmp(readbuf, "show") == 0) {
+			show_p();
+			continue;
+		}
+		else if (strcmp(readbuf, "restart") == 0) {
+			restart_p(fd_stdin);
+			continue;
+		}
+		else if (strcmp(readbuf, "kill") == 0) {
+			kill_p(fd_stdin);
+			continue;
+		}
+		else if (strcmp(readbuf, "quit") == 0) {
 			clear();
-			printf("                        ==================================\n");
-			printf("                                   Process Manager           \n");
-			printf("                                  Based on Orange's \n\n");
-			printf("                        ==================================\n");
-			continue;
-		}
-		else if (!strcmp(rdbuf, "info")) {
-			ProcessInfo();
-			continue;
-		}
-		else if (!strcmp(rdbuf, "create")) {
-			int i;
-			for (i = 0; i < NR_TASKS + NR_PROCS; ++i)
-			{
-				if (proc_table[i].priority == 0)
-				{
-					break;
-				}
-			}
-			if (i == NR_TASKS + NR_PROCS)
-				printf("process list is full! \n");
-			else
-			{
-				i = addProcess();
-				proc_table[i].priority = 10;
-			/*	memset(proc_table[i].name, "new process", 20);*/
-				/*proc_table[i].name[0] = "new process";*/
-				printf("a new process is running!\n");
-			}
-			continue;
-		}
-		else if (!strcmp(rdbuf, "kill")) {
-			int _pid;
-			printf("Input the pro-ID #");
-			char buf[70];
-			int m = read(fd_stdin, buf, 70);
-			buf[m] = 0;
-			atoi(buf, &_pid);
-			if (!strcmp(proc_table[_pid].name, "TestA")) {
-				printf("Can't killed sysytem process!\n");
-				continue;
-			}
-			if (!strcmp(proc_table[_pid].name, "TestB")) {
-				printf("Can't killed sysytem process!\n");
-				continue;
-			}
-			if (!strcmp(proc_table[_pid].name, "TestC")) {
-				printf("kill successful!\n");
-				continue;
-			}
-			else {
-				if (proc_table[_pid].priority == 0)
-				{
-					printf("kill failed!\n");
-					continue;
-				}
-				/*让其优先级为零 挂起 近似于kill*/
-				proc_table[_pid].priority = 0;
-				proc_table[_pid].name[0] = 0;
-				printf("kill successful!\n");
-				continue;
-			}
-		}
-		else if (!strcmp(rdbuf, "exit")) {
-			welcome();
 			return;
 		}
 		else {
-			printf("Command not found, please input help to get help!\n");
+			wrongCommond();
 			continue;
 		}
 	}
