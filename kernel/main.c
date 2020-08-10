@@ -1,14 +1,14 @@
-/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                            main.c
-						针对源码进行了改进
-						通过原有的TestABC
-						写上可以进行操作的shell
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                                    Xuejinwei, 2018
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-#define  H  8//地图的高
-#define  L 16//地图的长
-
+/*************************************************************************//**
+ *****************************************************************************
+ * @file   keyboard.c
+ * @brief  
+ * @author OS开发小组
+ * @date   2020.7~2020.8
+ * 
+ * 
+ * 
+ *****************************************************************************
+ *****************************************************************************/
 #include "type.h"
 #include "stdio.h"
 #include "const.h"
@@ -661,8 +661,23 @@ disp_color_str("           NQfVhR    DOLpDM  cRMMNBNNQhDOOfLlONM        ",GREEN)
 disp_color_str("            NMMNNMACfBNMMMMi    rhNNNNNMMMMMNRa         ",GREEN);disp_color_str("   cDNMMMMMNQC    \n",YELLOW);                              
 disp_color_str("               cLZRMMNOprj\n",GREEN);                                                                                                 
 disp_color_str("oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n",YELLOW);                                                                                                                                                                              
-	milli_delay(30000);
+	milli_delay(10000);
 	disp_pos = 0;
+	for (j = 0; j < start_loc + 1600; j++) { disp_str(" "); }
+	disp_pos = 0;
+	for (j = 0; j < start_loc + 80; j++) { disp_str(" "); }
+disp_color_str("                                 9BBB                 \n",GREEN);                                         
+disp_color_str("iBBBBBBBBBB                      hBBB                 ",GREEN); disp_color_str(",i:i 2222ss,  BBBBBBBBBB\n",YELLOW);                
+disp_color_str(":BBB:    BB                      2BBB                 ",GREEN); disp_color_str("GBBBiBBBBBBr  BBBs    MB\n",YELLOW);                
+disp_color_str(",BBB        sBBB, ,i: ,2ss5hXhh  2BBB  rBi  ,2ss2hhX2:",GREEN); disp_color_str("2BBB      Bi  BBB,      \n",YELLOW);                
+disp_color_str(":BBB2:,     sBBBBBBBB 2BBBBBBBB  2BBB  BB   sBBBBBBBBS",GREEN); disp_color_str("sBBB      Bi  BBB9::,   \n",YELLOW);                
+disp_color_str(":BBBBBBBBBB iBBB,  BB rBBB   9B  2BBB BB    :BBB    Bs",GREEN); disp_color_str("sBBB      Bi  BBBBBBBBBB\n",YELLOW);                
+disp_color_str("       BBBB iBBB   BB rBBB   hB  2BBB BBS   ,BBB MBBB2",GREEN); disp_color_str("sBBB      Bi        9BBB\n",YELLOW);                
+disp_color_str("       GBBM iBBB   BB rBBB   GB  2BBB  sBB2  BBB  irs ",GREEN); disp_color_str("sBBB      Bi        sBBB\n",YELLOW);                
+disp_color_str("BBirri:BBBB rBBB   BB sBBBBBBBB: hBBB    9B: BBBi     ",GREEN); disp_color_str("2BBB,    ,B: BBrrrr:BBBB\n",YELLOW);                
+disp_color_str("GBBBBBBBBBB iBBB   BB rBBBBGrMBB sBBB        BBBBBBBBh",GREEN); disp_color_str("GBBBBBBBBBBr sBBBBBBBBBB\n",YELLOW);                
+	milli_delay(30000);
+	disp_pos = 0;   
 	clear();
 }
 
@@ -678,7 +693,7 @@ void welcome()
 	clear();
 	printf("                        ==================================\n");
 	printf("                                   	  SnakeOS            \n");
-	printf("                                 Kernel on Orange's \n\n");
+	printf("                                 Based on Orange's \n\n");
 	printf("                                      1851008\n");
 	printf("                                      1852657\n");
 	printf("                                      1853144\n");
@@ -716,22 +731,10 @@ void TestA()
 	welcome();
 
 	while (1) {
-		printl("[root@localhost /] ");
+		printl("$ ");
 		int r = read(fd_stdin, rdbuf, 70);
 		rdbuf[r] = 0;
-		if (!strcmp(rdbuf, "cal"))
-		{
-			int year;
-			char temp[70];
-			printf("input the year:");
-			int r = read(fd_stdin, temp, 70);
-			temp[r] = 0;
-			atoi(temp, &year);
-			//Calendar(year);
-			printf("\n");
-			continue;
-		}
-        else if (!strcmp(rdbuf, "proc"))
+		if (!strcmp(rdbuf, "proc"))
         {
 			ProcessManager(fd_stdin, fd_stdout);
 			continue;
@@ -808,21 +811,6 @@ void help()
 	printf("\nUse alt+F2 to Run the file manager.\n");
 	printf("==============================================================================\n");
 }
-/*======================================================================*
-calculator
-计算器生成相关函数
-*======================================================================*/
-
-/*======================================================================*
-Calendar
-日历生成相关函数
-*======================================================================*/
-
-/*思路（利用儒略日进行日历计算）:
-（1）首先需要打印年月和月历的周一到周日
-（2）判断每个月的1号是周几，这样利用固定的算法就可以依次求出2、3、4、、、等是周几
-（3）判断什么时候进行换行；判断是否是闰年。
-*/
 
 /*======================================================================*
 小游戏1 文字冒险
@@ -2032,7 +2020,7 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 	clear();
 	printf("                        ==================================\n");
 	printf("                                   Process Manager           \n");
-	printf("                                 Kernel on Orange's \n\n");
+	printf("                                  Based on Orange's \n\n");
 	printf("                        ==================================\n");
 
 
@@ -2049,7 +2037,7 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 			clear();
 			printf("                        ==================================\n");
 			printf("                                   Process Manager           \n");
-			printf("                                 Kernel on Orange's \n\n");
+			printf("                                  Based on Orange's \n\n");
 			printf("                        ==================================\n");
 			continue;
 		}
@@ -2111,12 +2099,7 @@ void ProcessManager(int fd_stdin,int fd_stdout)
 			}
 		}
 		else if (!strcmp(rdbuf, "exit")) {
-			clear();
-			printf("                        ==================================\n");
-			printf("                                   Xinux v1.0.0             \n");
-			printf("                                 Kernel on Orange's \n");
-			printf("                                     Welcome !\n");
-			printf("                        ==================================\n");
+			welcome();
 			return;
 		}
 		else {
