@@ -700,6 +700,7 @@ void welcome()
 	printf("                                      1854204\n");
 	printf("                                      1854304\n");
 	printf("                                Enjoy using our OS:)\n");
+	printf("                            \nInput help:get command list)\n");
 	printf("                        ==================================\n");
 	printf("\n\n\n\n\n\n\n\n\n\n");
 }
@@ -734,7 +735,7 @@ void TestA()
 		printl("$ ");
 		int r = read(fd_stdin, rdbuf, 70);
 		rdbuf[r] = 0;
-		if (!strcmp(rdbuf, "proc"))
+		if (!strcmp(rdbuf, "process"))
         {
 			ProcessManager(fd_stdin, fd_stdout);
 			continue;
@@ -793,8 +794,25 @@ void TestA()
 
 }
 
-
-void help()
+void help() {
+	printf("     ======================================================================\n");
+	printf("     |--------------------------SnakeOS For You---------------------------|\n");
+	printf("     |--------------------------Operation guide---------------------------|\n");
+	printf("     |--------------------------------------------------------------------|\n");
+	printf("     |-------1.process-----|-------A process manage,show all process-in---|\n");
+	printf("     |-------2.cl----------|-------Clear the screen-----------------------|\n");
+	printf("     |-------3.help--------|-------Show operation guide-------------------|\n");
+	printf("     |-------4.cal-----  --|-------Show a calendar------------------------|\n");
+	printf("     |-------5.calcu-------|-------Open a calculator----------------------|\n");
+	printf("     |-------6.game1-------|-------Run the game(guess number) on this OS--|\n");
+	printf("     |-------7.game2-------|-------Run the game(greedy snake) on this OS--|\n");
+	printf("     |-------8.timer-------|-------Set Your clock-------------------------|\n");
+	printf("     |-------9.game3-------|-------Run the game(who is bigger) on this OS-|\n");
+	printf("     |-------10.game4------|-------Run a small game1(2048) on this OS-----|\n");
+	printf("     |-------11.Use alt+F2 to Run the file manager.-----------------------|\n");
+	printf("     ======================================================================\n");
+}
+/*void help()
 {
 	printf("=============================================================================\n");
 	printf("Command List     :\n");
@@ -810,7 +828,7 @@ void help()
     printf("11. game4      :Run a small game1(2048) on this OS\n");
 	printf("\nUse alt+F2 to Run the file manager.\n");
 	printf("==============================================================================\n");
-}
+}*/
 
 /*======================================================================*
 小游戏1 文字冒险
@@ -1961,6 +1979,59 @@ void TestC() {
 								进程任务管理
 *======================================================================*/
 
+//进程管理的主页面
+void Processhomepage();
+//进程管理的帮助页面
+void help_p();
+//kill:结束某个指定的进
+void kill_p(int fd_stdin);
+//restart：重启指定的某个进程
+void restart_p(int fd_stdin);
+//查看进程的内部信息，展示进程列表
+void show_p();
+//错误指令
+void wrongCommond();
+
+
+void ProcessManager(int in, int out)
+{
+	char readbuf[128];
+	Processhomepage();
+	while (1) {
+		printf("SnakeOS for you: $ ");
+		int par = read(in, readbuf, 70);
+		readbuf[par] = 0;
+		if (strcmp(readbuf, "help") == 0) {
+			help_p();
+			continue;
+		}
+		else if (strcmp(readbuf, "kill") == 0) {
+			kill_p(in);
+			continue;
+		}
+		else if (strcmp(readbuf, "show") == 0) {
+			show_p();
+			continue;
+		}
+		else if (strcmp(readbuf, "restart") == 0) {
+			restart_p(in);
+			continue;
+		}
+		else if (strcmp(readbuf, "clear") == 0) {
+			Processhomepage();
+			continue;
+		}
+		else if (strcmp(readbuf, "quit") == 0) {
+			clear();
+			return;
+		}
+		else {
+			wrongCommond();
+			continue;
+		}
+	}
+	return;
+}
 void Processhomepage()
 {
 	clear();
@@ -1975,165 +2046,100 @@ void Processhomepage()
 	printf("      ||                           Get command list                     ||\n");
 	printf("      ====================================================================\n");
 }
-void help_c() {
-	printf("====================================================================\n");
-	printf("|-------------------------SnakeOS For You--------------------------|\n");
-	printf("|--------------------process system command list-------------------|\n");
-	printf("|------------------------------------------------------------------|\n");
-	printf("|-------1.show-------|-------Show your process information---------|\n");
-	printf("|-------2.restart----|-------Restart a process---------------------|\n");
-	printf("|-------3.kill-------|-------Kill a process------------------------|\n");
-	printf("|-------4.clear------|-------Clear the screen----------------------|\n");
-	printf("|-------5.help-------|-------Show process system command list------|\n");
-	printf("|-------6.quit-------|-------Quit the process manger---------------|\n");
-	printf("====================================================================\n");
+void help_p() {
+	printf("      ====================================================================\n");
+	printf("      |-------------------------SnakeOS For You--------------------------|\n");
+	printf("      |--------------------process system command list-------------------|\n");
+	printf("      |------------------------------------------------------------------|\n");
+	printf("      |-------1.show-------|-------Show your process information---------|\n");
+	printf("      |-------2.restart----|-------Restart a process---------------------|\n");
+	printf("      |-------3.kill-------|-------Kill a process------------------------|\n");
+	printf("      |-------4.clear------|-------Clear the screen----------------------|\n");
+	printf("      |-------5.help-------|-------Show process system command list------|\n");
+	printf("      |-------6.quit-------|-------Quit the process manger---------------|\n");
+	printf("      ====================================================================\n");
 }
 
-/*添加进程函数*/
-int addProcess()
+
+//kill:结束某个指定的进
+void kill_p(int in)
 {
-	int i;
-	for (i = 0; i < NR_TASKS + NR_PROCS; ++i)//逐个遍历
-	{
-		if (proc_table[i].priority == 0)
-			break;//挂起的就退出循环
-	}
-	return i;
-}
-/*结束进程*/
-void kill_p1(int fd_stdin)
-{
-	int _pid;
+	int id;
 	printf("Input the ID(you want to kill): ");
-	char cstr[60];
-	int par = read(fd_stdin, cstr, 60);
+	char cstr[50];
+	int par = read(in, cstr, 50);
 	cstr[par] = 0;
-	atoi(cstr, &_pid);
-	if (!strcmp(proc_table[_pid].name, "TestA")) {
-		printf("Can't killed sysytem process!\n");
-		return;
-	}
-	if (!strcmp(proc_table[_pid].name, "TestB")) {
-		printf("Can't killed sysytem process!\n");
-		return;
-	}
-	if (!strcmp(proc_table[_pid].name, "TestC")) {
-		proc_table[_pid].priority = 0;
-		printf("kill successful!\n");
-		return;
-	}
-	else {
-		if (proc_table[_pid].priority == 0)
-		{
-			printf("kill failed!\n");
-			return;
-		}
-		/*让其优先级为零 挂起 近似于kill*/
-		proc_table[_pid].priority = 0;
-		//proc_table[_pid].name[0] = 0;
-		printf("kill successful!\n");
-		return;
-	}
-}
+	atoi(cstr, &id);
 
-//结束进程
-void kill_p(int fd_stdin)
-{
-	int p_pid;
-	printf("Input the ID(you want to kill): ");
-	char cstr[60];
-	int par = read(fd_stdin, cstr, 60);
-	cstr[par] = 0;
-	atoi(cstr, &p_pid);
-
-	//健壮性处理以及结束进程
-	if (p_pid >= NR_TASKS + NR_PROCS || p_pid < 0)
+	//结束进程
+	if (id >= NR_TASKS + NR_PROCS || id < 0)
 	{
 		printf("The PID out of the range\n");
 		return;
 	}
 	else {
-		if (p_pid == 4 || p_pid == 5)
+		if (id == 4 || id == 5)  //TestA与TestB无法结束
 		{
 			printf("Cannot kill this process!please retry\n");
 			return;
 		}
 		else {
-			if (p_pid == 6)
+			if (id == 6) //结束进程TestC
 			{
-				proc_table[p_pid].priority = 0;
+				proc_table[id].priority = 0;
 				printf("Successful!you killed this process\n");
-					//return;
+				//return;
 			}
 			else {
-				if (proc_table[p_pid].priority == 0)
+				if (proc_table[id].priority == 0)//当进程优先级为0时，认为是已挂起，或已经结束掉的进程
 				{
 					printf("Kill failed!the process has been killed\n");
 					return;
 				}
-				proc_table[p_pid].priority = 0;
+				proc_table[id].priority = 0;
 				printf("Successful!you killed this task\n");
 			}
 		}
 	}
-	show_p();
 }
-/*重启进程*/
-void restart_p1()
+
+//restart：重启指定的某个进程
+void restart_p(int in)
 {
-	int i;
-	for (i = 0; i < NR_TASKS + NR_PROCS; i++)
-	{
-		if (proc_table[i].priority == 0)
-		{
-			break;
-		}
-	}
-	if (i == NR_TASKS + NR_PROCS)
-		printf("process list is full! \n");
-	else
-	{
-		proc_table[i].priority = 10;
-		/*	memset(proc_table[i].name, "new process", 20);*/
-			/*proc_table[i].name[0] = "new process";*/
-		printf("a new process is running!\n");
-	}
-}
-void restart_p(int fd_stdin)
-{
-	int id;
 	printf("Input the ID(you want to restart): ");
-	char cstr[10];
-		int par=read(fd_stdin, cstr,10);
-		cstr[par] = 0;
-		atoi(cstr, &id);
-	if (id >= NR_TASKS + NR_PROCS || id < 0)
+	int id;
+	char cstr[50];
+	int par = read(in, cstr, 50);
+	cstr[par] = 0;
+	atoi(cstr, &id);
+	if (id >= NR_TASKS + NR_PROCS || id < 0)//检测输入的id号是否超出边界
 	{
 		printf("The pid out of the range\n");
 		return;
-	}else if (proc_table[id].priority == 0)
-		{
-			proc_table[id].priority = 10;
-			printf("Restart successful!\n");
-			return;
-		}
-		else {
-			printf("The process is running!No need to restart\n");
-		}
+	}
+	else if (proc_table[id].priority == 0) //优先级为0的进程才需要重启
+	{
+		proc_table[id].priority = 10;
+		printf("Restart successful!\n");
+		return;
+	}
+	else {
+		printf("The process is running!No need to restart\n");
+	}
 	show_p();
 }
-/*查看系统内运行情况*/
+//查看进程的内部信息，展示进程列表
 void show_p()
 {
 	printf("========================================================================\n");
 	printf("*     PID      |       Name     |    Priority    |    Running?         *\n");
 	//进程号，进程名，优先级，是否是系统进程，是否在运行
 	printf("========================================================================\n");
-	for (int i = 0; i < NR_TASKS + NR_PROCS; ++i)//逐个遍历
+	for (int i = 0; i < NR_TASKS + NR_PROCS; ++i)//从进程号为0开始遍历结束逐个遍历
 	{
 		printf("        %d", proc_table[i].pid);
 		printf("              %s", proc_table[i].name);
-		if (proc_table[i].priority == 0) {
+		if (proc_table[i].priority == 0) {//根据不同情况，规范格式
 			if (i == 0 || i == 1) {
 				printf("                  %d", proc_table[i].priority);
 			}
@@ -2143,7 +2149,8 @@ void show_p()
 			else if (i == 6) {
 				printf("                %d", proc_table[i].priority);
 			}
-		}else if (i == 2 || i==3) {
+		}
+		else if (i == 2 || i == 3) {
 			printf("                  %d", proc_table[i].priority);
 		}
 		else if (i == 4 || i == 5 || i == 6) {
@@ -2158,59 +2165,16 @@ void show_p()
 		{
 			printf("             no\n");
 		}
-		/*if (proc_table[i].priority == 0)
-			continue;//系统资源跳过
-		printf("        %d           %s              %d            yes\n", proc_table[i].pid, proc_table[i].name, proc_table[i].priority);
-*/	}
+	}
 	printf("========================================================================\n");
+	return;
 }
+//错误指令
 void wrongCommond()
 {
 	printf("Wrong command.you can input help to get the command list\n");
 	printf("please retry!\n");
 	return;
-}
-
-
-void ProcessManager(int fd_stdin,int fd_stdout)
-{
-	int i;
-	char readbuf[128];
-	Processhomepage();
-	while (1) {
-		printf("SnakeOS for you: $ ");
-		int r = read(fd_stdin, readbuf, 70);
-		readbuf[r] = 0;
-
-		if (strcmp(readbuf, "help") == 0) {
-			help_c();
-			continue;
-		}
-		else if (strcmp(readbuf, "clear") == 0) {
-			Processhomepage();
-			continue;
-		}
-		else if (strcmp(readbuf, "show") == 0) {
-			show_p();
-			continue;
-		}
-		else if (strcmp(readbuf, "restart") == 0) {
-			restart_p(fd_stdin);
-			continue;
-		}
-		else if (strcmp(readbuf, "kill") == 0) {
-			kill_p(fd_stdin);
-			continue;
-		}
-		else if (strcmp(readbuf, "quit") == 0) {
-			clear();
-			return;
-		}
-		else {
-			wrongCommond();
-			continue;
-		}
-	}
 }
 
 
@@ -2235,4 +2199,3 @@ PUBLIC void panic(const char *fmt, ...)
 	/* should never arrive here */
 	__asm__ __volatile__("ud2");
 }
-
