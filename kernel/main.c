@@ -1550,6 +1550,138 @@ void Game2(int fd_stdin, int fd_stdout)
 /*======================================================================*
                             Timer
  *======================================================================*/
+#include<stdio.h>
+#include<stdlib.h>
+
+#define MAX_DIGITS 10
+
+void clear_digits_array();
+void process_digit(int digit, int position);
+void print_digits_array();
+
+int segments[10][7] = { {2,1,1,0,1,1,2},{0,0,1,0,0,1,0},{2,0,1,2,1,0,2},
+					   {2,0,1,2,0,1,2},{0,1,1,2,0,1,0},{2,1,0,2,0,1,2},
+					   {2,1,0,2,1,1,2},{2,0,1,0,0,1,0},{2,1,1,2,1,1,2},
+					   {2,1,1,2,0,1,2} };
+int digits[3][MAX_DIGITS * 4];
+
+int DigitNumber(int fd_stdin, int fd_stdout)
+{
+	clear();
+	printf("\n \n ");
+	printf("          Please set your timer !(NOTICE: the unit is second!^.^)\n");
+	char ai[2];
+	int i;
+	int tmp = 0;
+	int sai = 0;
+	clear_digits_array();
+	for (i = 0; i < MAX_DIGITS;)
+	{
+		read(fd_stdin, ai, 1);//read the number
+		if (!strcmp(ai, "0")) {
+			process_digit(0, i); i++;//compare with the number we preset one-by-one
+		}
+		if (!strcmp(ai, "1")) {
+			process_digit(1, i); i++;
+		}
+		if (!strcmp(ai, "2")) {
+			process_digit(2, i); i++;
+		}
+		if (!strcmp(ai, "3")) {
+			process_digit(3, i); i++;
+		}
+		if (!strcmp(ai, "4")) {
+			process_digit(4, i); i++;
+		}
+		if (!strcmp(ai, "5")) {
+			process_digit(5, i); i++;
+		}
+		if (!strcmp(ai, "6")) {
+			process_digit(6, i); i++;
+		}
+		if (!strcmp(ai, "7")) {
+			process_digit(7, i); i++;
+		}
+		if (!strcmp(ai, "8")) {
+			process_digit(8, i); i++;
+		}
+		if (!strcmp(ai, "9")) {
+			process_digit(9, i); i++;
+		}
+		if (!strcmp(ai, "\n")) {
+			i = MAX_DIGITS;
+		}
+		sai = i;
+	}
+	atoi(ai, &tmp);
+
+	printf("\n \n");
+	for (; tmp >= 0; tmp--) {
+		print_digits_array();//to make the count down function
+		printf("left\n");
+		clear_digits_array();
+		if (tmp > 0 && sai > 0); {
+			process_digit(tmp - 1, sai - 1); }
+
+		milli_delay(10000);
+	}
+	return 0;
+}
+
+/**************************************************
+ *clear_digits_array:initialize the digits        *
+ *                   array.                       *
+ **************************************************/
+
+void clear_digits_array(void)
+{
+	int i, j;
+	for (i = 0; i < 3; i++)
+		for (j = 0; j < MAX_DIGITS * 4; j++)
+		{
+			digits[i][j] = 0;
+		}
+}
+
+/**************************************************
+ *process_digit:process the number's segment in   *
+ *              digit array in proper position.   *
+ **************************************************/
+
+void process_digit(int digit, int position)
+{
+	int i = position * 4;
+	digits[0][i + 1] = segments[digit][0];
+	digits[1][i] = segments[digit][1];
+	digits[1][i + 2] = segments[digit][2];
+	digits[1][i + 1] = segments[digit][3];
+	digits[2][i] = segments[digit][4];
+	digits[2][i + 2] = segments[digit][5];
+	digits[2][i + 1] = segments[digit][6];
+}
+
+/**************************************************
+ * print_digits_array: to print the numbers in    *
+ *                     digit way.                 *
+ **************************************************/
+
+void print_digits_array(void)
+{
+	int i, j;
+	for (i = 0; i < 3; i++)
+	{
+		for (j = 0; j < MAX_DIGITS * 4; j++)
+		{
+			if (digits[i][j] == 0)
+				printf(" ");
+			else if (digits[i][j] == 1)
+				printf("|");
+			else if (digits[i][j] == 2)
+				printf("_");
+		}
+		printf("\n");
+	}
+}
 
 /*======================================================================*
 小游戏3 记忆力测试
@@ -1646,6 +1778,202 @@ void to_upper(char *str){
 		if(*str >= 'a' && *str <= 'z')
 			*str += ('A' - 'a');
 	return;
+}
+/*======================================================================*
+小游戏4
+扫雷
+*======================================================================*/
+#define rows 11
+#define cols 11
+#define Count 10
+
+char mine[rows][cols];
+char show[rows][cols];
+
+void sl_init()
+{
+	int i = 0;
+	int j = 0;
+	for (i = 0; i < rows - 1; i++)
+	{
+		for (j = 0; j < cols - 1; j++)
+		{
+			mine[i][j] = '0';
+			show[i][j] = '*';
+		}
+	}
+}
+
+void sl_set_mine()
+{
+	mine[1][3] = '1';
+	mine[2][6] = '1';
+	mine[3][6] = '1';
+	mine[4][1] = '1';
+	mine[5][4] = '1';
+	mine[6][8] = '1';
+	mine[7][3] = '1';
+	mine[8][8] = '1';
+	mine[9][5] = '1';
+	mine[7][9] = '1';
+}
+
+
+void sl_display(char a[rows][cols])
+{
+	clear();
+	printf("**************************************\n");
+	printf("*              sweep thunder                *\n");
+	printf("**************************************\n");
+	printf("*      1. 10 bombs total             *\n");
+	printf("*      2. Enter 1-9 row number       *\n");
+	printf("*      3. Enter 1-9 col number       *\n");
+	printf("*      4. Enter q to quit            *\n");
+	printf("**************************************\n");
+	int i = 0;
+	int j = 0;
+	printf("\n");
+	printf(" ");
+	for (i = 1; i < cols - 1; i++)
+	{
+		printf(" %d ", i);
+	}
+	printf("\n");
+	for (i = 1; i < rows - 1; i++)
+	{
+		printf("%d", i);
+		for (j = 1; j < cols - 1; j++)
+		{
+			printf(" %c ", a[i][j]);
+		}
+		printf("\n");
+	}
+}
+
+//count  
+int sl_get_num(int x, int y)
+{
+	int count = 0;
+	if (mine[x - 1][y - 1] == '1')
+	{
+		count++;
+	}
+	if (mine[x - 1][y] == '1')
+	{
+		count++;
+	}
+	if (mine[x - 1][y + 1] == '1')
+	{
+		count++;
+	}
+	if (mine[x][y - 1] == '1')
+	{
+		count++;
+	}
+	if (mine[x][y + 1] == '1')
+	{
+		count++;
+	}
+	if (mine[x + 1][y - 1] == '1')
+	{
+		count++;
+	}
+	if (mine[x + 1][y] == '1')
+	{
+		count++;
+	}
+	if (mine[x + 1][y + 1] == '1')//eight diretion to search,1 mine for 1 count  
+	{
+		count++;
+	}
+	return  count;
+}
+
+
+int sl_sweep()
+{
+	int count = 0;
+	int x = 0, y = 0;
+	char sx[2], sy[2];
+	while (count != ((rows - 2)*(cols - 2) - Count))
+	{
+		printf("Please input row number: ");
+		int r = read(0, sx, 2);
+		if (sx[0] == 'q')
+			return 0;
+		x = sx[0] - '0';
+		while (x <= 0 || x > 9)
+		{
+			printf("Wrong Input!\n");
+			printf("Please input row number: ");
+			r = read(0, sx, 2);
+			if (sx[0] == 'q')
+				return 0;
+			x = sx[0] - '0';
+		}
+
+		printf("Please input col number: ");
+		r = read(0, sy, 2);
+		if (sy[0] == 'q')
+			return 0;
+		y = sy[0] - '0';
+		while (y <= 0 || y > 9)
+		{
+			printf("Wrong Input!\n");
+			printf("Please input col number: ");
+			r = read(0, sy, 2);
+			if (sy[0] == 'q')
+				return 0;
+			y = sy[0] - '0';
+		}
+
+		if (mine[x][y] == '1')
+		{
+			sl_display(mine);
+			printf("YOU DIED! Game Over!\n");
+
+			return 0;
+		}
+		else
+		{
+			int ret = sl_get_num(x, y);
+			show[x][y] = ret + '0';
+			sl_display(show);
+			count++;
+		}
+	}
+	printf("YOU WIN!\n");
+	sl_display(mine);
+	return 0;
+}
+
+int runMine(fd_stdin, fd_stdout)
+{
+	printf("**************************************\n");
+	printf("*              sweep thunder                *\n");
+	printf("**************************************\n");
+	printf("*      1. 10 bombs total             *\n");
+	printf("*      2. Enter 1-9 row number       *\n");
+	printf("*      3. Enter 1-9 col number       *\n");
+	printf("*      4. Enter q to quit            *\n");
+	printf("**************************************\n");
+
+	sl_init();
+	sl_set_mine();
+	sl_display(show);
+	sl_sweep();
+
+	printf("\nEnter anything to continue...");
+	char rdbuf[128];
+	int r = read(fd_stdin, rdbuf, 70);
+	rdbuf[r] = 0;
+	while (r < 1)
+	{
+		r = read(fd_stdin, rdbuf, 70);
+	}
+	clear();
+	printf("\n");
+	return 0;
 }
 
 /*======================================================================*
