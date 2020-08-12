@@ -732,7 +732,7 @@ void TestA()
 	welcome();
 
 	while (1) {
-		printl("$ ");
+		printf("SnakeOS for you: $ ");
 		int r = read(fd_stdin, rdbuf, 70);
 		rdbuf[r] = 0;
 		if (!strcmp(rdbuf, "process"))
