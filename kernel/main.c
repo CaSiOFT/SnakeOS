@@ -802,7 +802,7 @@ void help() {
 	printf("     |-------1.process-----|-------A process manage,show all process-in---|\n");
 	printf("     |-------2.cl----------|-------Clear the screen-----------------------|\n");
 	printf("     |-------3.help--------|-------Show operation guide-------------------|\n");
-	printf("     |-------4.cal-----  --|-------Show a calendar------------------------|\n");
+	printf("     |-------4.cal---------|-------Show a calendar------------------------|\n");
 	printf("     |-------5.calcu-------|-------Open a calculator----------------------|\n");
 	printf("     |-------6.game1-------|-------Run the game(guess number) on this OS--|\n");
 	printf("     |-------7.game2-------|-------Run the game(greedy snake) on this OS--|\n");
