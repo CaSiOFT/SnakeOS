@@ -154,14 +154,14 @@ PRIVATE void init_fs()
 	send_recv(BOTH, dd_map[MAJOR(ROOT_DEV)].driver_nr, &driver_msg);
 
 	//根据superblock判断需不需要mkfs
-	//RD_SECT(ROOT_DEV, 1);
+	RD_SECT(ROOT_DEV, 1);
 
-	//sb = (struct super_block *)fsbuf;
-	//if (sb->magic != MAGIC_V1) {
+	sb = (struct super_block *)fsbuf;
+	if (sb->magic != MAGIC_V1) {
 		/* make FS */
-		//printl("{FS} mkfs\n");
+		printl("{FS} mkfs\n");
 		mkfs();
-	//}
+	}
 
 	/* load super block of ROOT */
 	read_super_block(ROOT_DEV);

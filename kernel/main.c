@@ -150,7 +150,7 @@ void colorful()
 	clear();
 	int j;
 	int delay_time = 2000;
-	int start_loc = 1520;
+	int start_loc = 1280;
 	disp_pos = 0;
 	for (j = 0; j < start_loc; j++) { disp_str(" "); }
                             
