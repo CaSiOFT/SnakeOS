@@ -699,8 +699,8 @@ void welcome()
 	printf("                                      1853144\n");
 	printf("                                      1854204\n");
 	printf("                                      1854304\n");
-	printf("                                Enjoy using our OS:)\n");
-	printf("                            \nInput help:get command list)\n");
+	printf("                                Enjoy using our OS:)\n\n");
+	printf("                             Input help:get command list)\n");
 	printf("                        ==================================\n");
 	printf("\n\n\n\n\n\n\n\n\n\n");
 }
