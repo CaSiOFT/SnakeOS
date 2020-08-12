@@ -788,7 +788,7 @@ void TestA()
 		
 
 		else
-			printf("Command not found, please input help to get help!\n");
+			printf("Wrong command!\n");
 	}
 
 }
@@ -1549,12 +1549,6 @@ THE HIGHER SCORE WINS FINALLY.
 							文件系统管理
  *======================================================================*/
 
-/*
-文件系统较为简洁
-在调用oranges系统已有的文件操作基础上进行了界面设计(参阅/fs/文件夹)
-仅提供文件创建,文件删除，文件打开，文件读写等操作
-*/
-
 struct Directory D[100];
 struct File F[100];
 int Dpos = 0;
@@ -1575,7 +1569,6 @@ void TestB()
 	/*打印界面*/
 	printf("                        ==================================\n");
 	printf("                                    File Manager           \n");
-	printf("                                 Kernel on Orange's \n\n");
 	printf("                        ==================================\n");
 
 	/*定义相关参数*/
@@ -1623,7 +1616,7 @@ void TestB()
 				if (i > 128)break;
 			}
 			if (i > 128) {
-				printf("Command not found, please input help to get help!\n");
+				printf("Wrong command!\n");
 				continue;
 			}
 
@@ -1667,7 +1660,7 @@ void TestB()
 				continue;
 			}
 			else {
-				printf("Command not found, please input help to get help!\n");
+				printf("Wrong command!\n");
 				continue;
 			}
 		}
@@ -1746,7 +1739,7 @@ int createFile(char* file_name)
 	int fd;
 	fd = open(file_name, O_CREAT | O_RDWR);
 	if(fd == -1){
-		printf("Create file failed! the file has been existed.\n");
+		printf("Wrong! the file has been existed.\n");
 		return -1;
 	}
 
@@ -1803,11 +1796,11 @@ int readFile(char* file_name)
 	int fd;
 	fd = open(file_name, O_RDWR);
 	if (fd ==-1) {
-		printf("Open file failed! please check the filename \n");
+		printf("Wrong! please check the filename \n");
 		return -1;
 	}
 	if(!inCurrentF(file_name)) {
-		printf("Open file failed! it isn't in current directory \n");
+		printf("Wrong! it isn't in current directory \n");
 		return -1;
 	}
 
@@ -1824,11 +1817,11 @@ int writeFile(char* file_name,int fd_stdin)
 	fd = open(file_name, O_RDWR);
 	if (fd == -1)
 	{
-		printf("Open file failed! please check the filename \n");
+		printf("Wrong! please check the filename \n");
 		return -1;
 	}
 	if(!inCurrentF(file_name)) {
-		printf("Open file failed! it isn't in current directory \n");
+		printf("Wrong! it isn't in current directory \n");
 		return -1;
 	}
 
@@ -1844,7 +1837,7 @@ int writeFile(char* file_name,int fd_stdin)
 int deleteFile(char* file_name) 
 {
 	if(!inCurrentF(file_name)) {
-		printf("Delete file failed! it isn't in current directory \n");
+		printf("Wrong! it isn't in current directory \n");
 		return -1;
 	}
 	struct File* p = current->link;
@@ -1864,7 +1857,7 @@ int deleteFile(char* file_name)
 	}
 	else
 	{
-		printf("Delete file failed! Please check the fileaname!\n");
+		printf("Wrong! Please check the fileaname!\n");
 		return -1;
 	}
 }
@@ -1895,7 +1888,7 @@ void Clear(struct Directory* x)
 int deleteDirectory(char* file_name)
 {
 	if(!inCurrentD(file_name)) {
-		printf("Delete directory failed! it isn't in current directory \n");
+		printf("Wrong! it isn't in current directory \n");
 		return -1;
 	}
 	struct Directory* p = current->child;
@@ -1917,7 +1910,7 @@ int deleteDirectory(char* file_name)
 int EnterChildDirectory(char* file_name)
 {
 	if(!inCurrentD(file_name)) {
-		printf("Enter directory failed! it isn't in current directory \n");
+		printf("Wrong! it isn't in current directory \n");
 		return -1;
 	}
 	struct Directory* p = current->child;
@@ -1930,7 +1923,7 @@ int EnterChildDirectory(char* file_name)
 int BackParentsDirectory()
 {
 	if(current == root){
-		printf("root has no parents directory!\n");
+		printf("Root has no parents directory!\n");
 		return -1;
 	}
 	else{
