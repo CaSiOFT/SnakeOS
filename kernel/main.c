@@ -765,7 +765,7 @@ void TestA()
                else if (!strcmp(rdbuf, "game3"))
 		{
 
-			//Game3(fd_stdin, fd_stdout);
+			Game3(fd_stdin, fd_stdout);
 		}
                else if (!strcmp(rdbuf, "game4"))
 		{
@@ -824,7 +824,7 @@ void help() {
 	printf("7. game1      : Run a small game1(guess number) on this OS\n");
 	printf("8. game2      : Run a small game2(greedy snake) on this OS\n");
 	printf("9. timer      : Set Your clock\n");
-	printf("10. game3      :Run a small game1(who is bigger) on this OS\n");
+	printf("10. game3      :Run a small game3(Test your memory) on this OS\n");
     printf("11. game4      :Run a small game1(2048) on this OS\n");
 	printf("\nUse alt+F2 to Run the file manager.\n");
 	printf("==============================================================================\n");
@@ -1552,15 +1552,101 @@ void Game2(int fd_stdin, int fd_stdout)
  *======================================================================*/
 
 /*======================================================================*
-game3                              WHO IS BIGGER
-							compare ur number
-The refereee give a random number under 100 as the max input number firstly.
-2 players input a number less than the above number respectively.
-Only if A(B) is more than B(A) but no more than 5, can A(B) win.
-Otherwise B(A) wins and get 100points.
-TOTAL 3 ROUNDS
-THE HIGHER SCORE WINS FINALLY.
+小游戏3 记忆力测试
  *======================================================================*/
+
+void Game3(int fd_stdin, int fd_stdout){
+	char rdbuf[26];
+	char str[26];
+	char c;
+	char input[2];
+	int delay_time;
+	int char_range;
+	int level;
+	printf("Test your memory!\n");
+	printf("Select the characters that will appear.\n");
+	printf("1.Only numbers\n");
+	printf("2.Numbers and letters\n");
+	read(fd_stdin, input, 1);
+	if(!strcmp(input, "1")){
+		char_range = 10;
+	}
+	else {
+		char_range = 34;
+	}
+
+	printf("Select the difficulty level\n");
+	printf("1.Easy\n");
+	printf("2.Normal\n");
+	printf("3.Hard\n");
+	read(fd_stdin, input, 1);
+	if(!strcmp(input, "1")){
+		delay_time = 3;
+	}
+	else if(!strcmp(input, "2")){
+		delay_time = 2;
+	}
+	else {
+		delay_time = 1;
+	}
+	printf("Ready?\n");
+	printf("Press Enter to start\n");
+	read(fd_stdin, input, 1);
+	level = 1;
+	for (; level < 26; level++){
+		for (int i = 0; i < level; i++){
+			c = my_rand(char_range);
+			if(c < 10)
+				c += 48;
+			else if(c == 18)
+				c = 'Y';
+			else if(c == 24)
+				c = 'Z';
+			else
+				c += 55;
+			str[i] = c;
+			milli_delay(30);
+		}
+		str[level] = 0;
+		printf(str);
+		if(level == 1)
+			milli_delay(2000);
+		milli_delay(1500 * delay_time * level);
+		clearview();
+		int r = read(fd_stdin, rdbuf, 25);
+		rdbuf[r] = 0;
+		to_upper(rdbuf);
+		if (!strcmp(rdbuf, str)){
+			printf("Right!\n");
+			printf("Press Enter to continue\n");
+			read(fd_stdin, input, 1);
+		}
+		else{
+			printf("The answer is %s\n", str);
+			printf("You have passed %d levels\n", level - 1);
+			printf("Press Enter to exit\n");
+			read(fd_stdin, input, 1);
+			return;
+		}
+	}
+	printf("Congratulations, you have passed all 25 levels!\n");
+	printf("Press Enter to exit\n");
+	read(fd_stdin, input, 1);
+	return;
+}
+
+int my_rand(int range){
+	long seed = get_ticks();
+	seed = (seed * 9301 + 49297) % range;
+	return (int)seed;
+}
+
+void to_upper(char *str){
+	for(; *str != 0; str++)
+		if(*str >= 'a' && *str <= 'z')
+			*str += ('A' - 'a');
+	return;
+}
 
 /*======================================================================*
                                TestB
