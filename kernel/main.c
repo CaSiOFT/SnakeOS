@@ -2417,12 +2417,12 @@ void ProcessManager(int in, int out)
 			help_p();
 			continue;
 		}
-		else if (strcmp(readbuf, "kill") == 0) {
-			kill_p(in);
-			continue;
-		}
 		else if (strcmp(readbuf, "show") == 0) {
 			show_p();
+			continue;
+		}
+		else if (strcmp(readbuf, "kill") == 0) {
+			kill_p(in);
 			continue;
 		}
 		else if (strcmp(readbuf, "restart") == 0) {
@@ -2464,16 +2464,14 @@ void help_p() {
 	printf("      |--------------------process system command list-------------------|\n");
 	printf("      |------------------------------------------------------------------|\n");
 	printf("      |-------1.show-------|-------Show your process information---------|\n");
-	printf("      |-------2.restart----|-------Restart a process---------------------|\n");
-	printf("      |-------3.kill-------|-------Kill a process------------------------|\n");
-	printf("      |-------4.clear------|-------Clear the screen----------------------|\n");
-	printf("      |-------5.help-------|-------Show process system command list------|\n");
+	printf("      |-------2.kill-------|-------Kill a process------------------------|\n");
+	printf("      |-------3.restart----|-------Restart a process---------------------|\n");
+	printf("      |-------4.help-------|-------Show process system command list------|\n");
+	printf("      |-------5.clear------|-------Clear the screen----------------------|\n");
 	printf("      |-------6.quit-------|-------Quit the process manger---------------|\n");
 	printf("      ====================================================================\n");
 }
-
-
-//kill:结束某个指定的进
+//kill:结束某个指定的进程
 void kill_p(int in)
 {
 	int id;
@@ -2498,18 +2496,25 @@ void kill_p(int in)
 		else {
 			if (id == 6) //结束进程TestC
 			{
-				proc_table[id].priority = 0;
-				printf("Successful!you killed this process\n");
-				//return;
+				if (proc_table[id].priority != 0) {
+					proc_table[id].priority = 0;         //优先级为0，近似挂起
+					printf("Successful!you killked this process\n");
+				}
+				else {
+					printf("Block failed!the process has been killed\n");
+				}
+				return;
 			}
 			else {
-				if (proc_table[id].priority == 0)//当进程优先级为0时，认为是已挂起，或已经结束掉的进程
+				if (proc_table[id].priority == 0)//当进程优先级为0时，认为是已结束的进程
 				{
 					printf("Kill failed!the process has been killed\n");
 					return;
 				}
-				proc_table[id].priority = 0;
-				printf("Successful!you killed this task\n");
+				else {
+					proc_table[id].priority = 0;
+					printf("Successful!you killed this task\n");
+				}
 			}
 		}
 	}
