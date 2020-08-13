@@ -740,14 +740,6 @@ void TestA()
 			ProcessManager(fd_stdin, fd_stdout);
 			continue;
         }
-
-		else if (!strcmp(rdbuf, "flm"))
-		{
-			printf("File Manager is already running on TTY1 ! \n");
-			TestB();
-			continue;
-
-		}
 		else if (!strcmp(rdbuf, "help"))
 		{
 			help();
@@ -770,23 +762,18 @@ void TestA()
                else if (!strcmp(rdbuf, "game4"))
 		{
 
-			//Game4(fd_stdin, fd_stdout);
-		}
-		else if (!strcmp(rdbuf, "calcu")) {
-			//calculator(fd_stdin, fd_stdout);
+			Game4(fd_stdin, fd_stdout);
 		}
                 else if (!strcmp(rdbuf, "timer") )
 		{
-			printf("haha!");
-                        //timer(fd_stdin, fd_stdout);
+            DigitNumber(fd_stdin, fd_stdout);
 
 		}
 		else if (strcmp(rdbuf, "cl") == 0)
 		{
 			clearview();
 			welcome();
-		}
-		
+		}	
 
 		else
 			printf("Wrong command!\n");
@@ -802,33 +789,14 @@ void help() {
 	printf("     |-------1.process-----|-------A process manage,show all process-in---|\n");
 	printf("     |-------2.cl----------|-------Clear the screen-----------------------|\n");
 	printf("     |-------3.help--------|-------Show operation guide-------------------|\n");
-	printf("     |-------4.cal---------|-------Show a calendar------------------------|\n");
-	printf("     |-------5.calcu-------|-------Open a calculator----------------------|\n");
-	printf("     |-------6.game1-------|-------Run the game(guess number) on this OS--|\n");
-	printf("     |-------7.game2-------|-------Run the game(greedy snake) on this OS--|\n");
-	printf("     |-------8.timer-------|-------Set Your clock-------------------------|\n");
-	printf("     |-------9.game3-------|-------Run the game(who is bigger) on this OS-|\n");
-	printf("     |-------10.game4------|-------Run a small game1(2048) on this OS-----|\n");
-	printf("     |-------11.Use alt+F2 to Run the file manager.-----------------------|\n");
+	printf("     |-------4.game1-------|-------Run the ADV game!----------------------|\n");
+	printf("     |-------5.game2-------|-------Run the chess game!--------------------|\n");
+	printf("     |-------6.timer-------|-------Set Your DigitNumber-------------------|\n");
+	printf("     |-------7.game3-------|-------Run the memory test game!--------------|\n");
+	printf("     |-------8.game4-------|-------Run the mineSweeping game!-------------|\n");
+	printf("     |-------9.Use alt+F2 to Run the file manager.------------------------|\n");
 	printf("     ======================================================================\n");
 }
-/*void help()
-{
-	printf("=============================================================================\n");
-	printf("Command List     :\n");
-	printf("1. proc       : A process manage,show you all process-info here\n");
-	printf("2. cl         : Clear the screen\n");
-	printf("3. help       : Show operation guide\n");
-	printf("5. cal        : Show a calendar\n");
-	printf("6. calcu      : open a calculator\n");
-	printf("7. game1      : Run a small game1(guess number) on this OS\n");
-	printf("8. game2      : Run a small game2(greedy snake) on this OS\n");
-	printf("9. timer      : Set Your clock\n");
-	printf("10. game3      :Run a small game3(Test your memory) on this OS\n");
-    printf("11. game4      :Run a small game1(2048) on this OS\n");
-	printf("\nUse alt+F2 to Run the file manager.\n");
-	printf("==============================================================================\n");
-}*/
 
 /*======================================================================*
 小游戏1 文字冒险
@@ -1550,9 +1518,6 @@ void Game2(int fd_stdin, int fd_stdout)
 /*======================================================================*
                             Timer
  *======================================================================*/
-#include<stdio.h>
-#include<stdlib.h>
-
 #define MAX_DIGITS 10
 
 void clear_digits_array();
@@ -1623,7 +1588,7 @@ int DigitNumber(int fd_stdin, int fd_stdout)
 		if (tmp > 0 && sai > 0); {
 			process_digit(tmp - 1, sai - 1); }
 
-		milli_delay(10000);
+		milli_delay(15000);
 	}
 	return 0;
 }
@@ -1947,7 +1912,7 @@ int sl_sweep()
 	return 0;
 }
 
-int runMine(fd_stdin, fd_stdout)
+int Game4(int fd_stdin, int fd_stdout)
 {
 	printf("**************************************\n");
 	printf("*              sweep thunder                *\n");
