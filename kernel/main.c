@@ -1689,7 +1689,7 @@ void Game3(int fd_stdin, int fd_stdout){
 	printf("Ready?\n");
 	printf("Press Enter to start\n");
 	read(fd_stdin, input, 1);
-	level = 1;
+	level = 5;
 	for (; level < 26; level++){
 		for (int i = 0; i < level; i++){
 			c = my_rand(char_range);
@@ -1706,8 +1706,6 @@ void Game3(int fd_stdin, int fd_stdout){
 		}
 		str[level] = 0;
 		printf(str);
-		if(level == 1)
-			milli_delay(2000);
 		milli_delay(1500 * delay_time * level);
 		clearview();
 		int r = read(fd_stdin, rdbuf, 25);
@@ -1720,13 +1718,13 @@ void Game3(int fd_stdin, int fd_stdout){
 		}
 		else{
 			printf("The answer is %s\n", str);
-			printf("You have passed %d levels\n", level - 1);
+			printf("You have passed %d levels\n", level - 5);
 			printf("Press Enter to exit\n");
 			read(fd_stdin, input, 1);
 			return;
 		}
 	}
-	printf("Congratulations, you have passed all 25 levels!\n");
+	printf("Congratulations, you have passed all 21 levels!\n");
 	printf("Press Enter to exit\n");
 	read(fd_stdin, input, 1);
 	return;
