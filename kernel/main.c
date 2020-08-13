@@ -145,6 +145,10 @@ void clear()
 	console_table[current_console].cursor = 0;
 }
 
+/*****************************************************************************
+*                               colorful
+*							   彩色开机画面
+*****************************************************************************/
 void colorful()
 {
 	clear();
@@ -680,14 +684,20 @@ disp_color_str("GBBBBBBBBBB iBBB   BB rBBBBGrMBB sBBB        BBBBBBBBh",GREEN); 
 	disp_pos = 0;   
 	clear();
 }
-
+/*****************************************************************************
+*                               clearview
+*								 清空屏幕
+*****************************************************************************/
 void clearview()
 {
 	int i = 0;
 	for (i = 0; i < 25; i++)
 		printf("\n");
 }
-
+/*****************************************************************************
+*                                welcome
+*								 欢迎界面
+*****************************************************************************/
 void welcome()
 {
 	clear();
@@ -731,56 +741,57 @@ void TestA()
 	clearview();
 	welcome();
 
-	while (1) {
+	while (1)
+	{
 		printf("SnakeOS for you: $ ");
 		int r = read(fd_stdin, rdbuf, 70);
 		rdbuf[r] = 0;
 		if (!strcmp(rdbuf, "process"))
-        {
+		{
 			ProcessManager(fd_stdin, fd_stdout);
 			continue;
-        }
+		}
 		else if (!strcmp(rdbuf, "help"))
 		{
 			help();
 		}
 		else if (!strcmp(rdbuf, "game1"))
 		{
-
 			Game1(fd_stdin, fd_stdout);
 		}
 		else if (!strcmp(rdbuf, "game2"))
 		{
-
 			Game2(fd_stdin, fd_stdout);
 		}
-               else if (!strcmp(rdbuf, "game3"))
+		else if (!strcmp(rdbuf, "game3"))
 		{
-
 			Game3(fd_stdin, fd_stdout);
 		}
-               else if (!strcmp(rdbuf, "game4"))
+		else if (!strcmp(rdbuf, "game4"))
 		{
-
 			Game4(fd_stdin, fd_stdout);
 		}
-                else if (!strcmp(rdbuf, "timer") )
+		else if (!strcmp(rdbuf, "game5"))
 		{
-            DigitNumber(fd_stdin, fd_stdout);
-
+			reactionTime(fd_stdin, fd_stdout);
+		}
+		else if (!strcmp(rdbuf, "timer"))
+		{
+			DigitNumber(fd_stdin, fd_stdout);
 		}
 		else if (strcmp(rdbuf, "cl") == 0)
 		{
 			clearview();
 			welcome();
-		}	
-
+		}
 		else
 			printf("Wrong command!\n");
 	}
-
 }
-
+/*****************************************************************************
+*                                 help
+*								 帮助显示
+*****************************************************************************/
 void help() {
 	printf("     ======================================================================\n");
 	printf("     |--------------------------SnakeOS For You---------------------------|\n");
@@ -1689,7 +1700,7 @@ void Game3(int fd_stdin, int fd_stdout){
 	printf("Ready?\n");
 	printf("Press Enter to start\n");
 	read(fd_stdin, input, 1);
-	level = 1;
+	level = 5;
 	for (; level < 26; level++){
 		for (int i = 0; i < level; i++){
 			c = my_rand(char_range);
@@ -1701,18 +1712,16 @@ void Game3(int fd_stdin, int fd_stdout){
 				c = 'Z';
 			else
 				c += 55;
-			str[i] = c;
+			str[i] = c;		//生成随机字符序列
 			milli_delay(30);
 		}
 		str[level] = 0;
 		printf(str);
-		if(level == 1)
-			milli_delay(2000);
-		milli_delay(1500 * delay_time * level);
+		milli_delay(1500 * delay_time * level);	//停留时间与字符串长度成正比，与难度反比
 		clearview();
 		int r = read(fd_stdin, rdbuf, 25);
 		rdbuf[r] = 0;
-		to_upper(rdbuf);
+		to_upper(rdbuf);	//输入的小写转大写
 		if (!strcmp(rdbuf, str)){
 			printf("Right!\n");
 			printf("Press Enter to continue\n");
@@ -1720,29 +1729,53 @@ void Game3(int fd_stdin, int fd_stdout){
 		}
 		else{
 			printf("The answer is %s\n", str);
-			printf("You have passed %d levels\n", level - 1);
+			printf("You have passed %d levels\n", level - 5);
 			printf("Press Enter to exit\n");
 			read(fd_stdin, input, 1);
 			return;
 		}
 	}
-	printf("Congratulations, you have passed all 25 levels!\n");
+	printf("Congratulations, you have passed all 21 levels!\n");	//最长25字符
 	printf("Press Enter to exit\n");
 	read(fd_stdin, input, 1);
 	return;
 }
 
-int my_rand(int range){
+int my_rand(int range){	//根据当前时间配上伪随机数公式生成随机数
 	long seed = get_ticks();
 	seed = (seed * 9301 + 49297) % range;
 	return (int)seed;
 }
 
-void to_upper(char *str){
+void to_upper(char *str){	//字符串内小写转大写
 	for(; *str != 0; str++)
 		if(*str >= 'a' && *str <= 'z')
 			*str += ('A' - 'a');
 	return;
+}
+
+/*======================================================================*
+反应能力测试
+*======================================================================*/
+void reactionTime(int fd_stdin, int fd_stdout){
+	char input[2];
+	char c;
+	long time;
+	do{
+		printf("Test your reaction speed.\n");
+		printf("Ready?\n");
+		printf("Press Enter to start\n");
+		read(fd_stdin, input, 1);
+		clearview();
+		milli_delay(3000 * (my_rand(10) + 10));
+		printf("Press the Enter!\n");
+		time = get_ticks();
+		read(fd_stdin, input, 1);
+		time = get_ticks() - time;
+		printf("You pressed the enter after %d milliseconds.\n", time * 4 / 10);
+		printf("Try again? Press y to continue.\n");
+		read(fd_stdin, input, 1);
+	} while (input[0] == 'y');
 }
 /*======================================================================*
 小游戏4
