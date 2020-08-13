@@ -34,6 +34,8 @@ struct Directory {
 		struct File* link;  //该目录下首文件
 };
 
+static int user = 0;
+
 /*======================================================================*
                             kernel_main
  *======================================================================*/
@@ -712,7 +714,7 @@ void welcome()
 	printf("                                Enjoy using our OS:)\n\n");
 	printf("                             Input help:get command list)\n");
 	printf("                        ==================================\n");
-	printf("\n\n\n\n\n\n\n\n\n\n");
+	printf("\n\n\n\n\n\n\n\n");
 }
 
 /*======================================================================*
@@ -743,49 +745,82 @@ void TestA()
 
 	while (1)
 	{
-		printf("SnakeOS for you: $ ");
-		int r = read(fd_stdin, rdbuf, 70);
-		rdbuf[r] = 0;
-		if (!strcmp(rdbuf, "process"))
+		user = 0;
+		printf("Select user.\n");
+		printf("1.admin\n");
+		printf("2.guest\n");
+		read(fd_stdin, rdbuf, 1);
+		if (rdbuf[0] == '1')
 		{
-			ProcessManager(fd_stdin, fd_stdout);
-			continue;
-		}
-		else if (!strcmp(rdbuf, "help"))
-		{
-			help();
-		}
-		else if (!strcmp(rdbuf, "game1"))
-		{
-			Game1(fd_stdin, fd_stdout);
-		}
-		else if (!strcmp(rdbuf, "game2"))
-		{
-			Game2(fd_stdin, fd_stdout);
-		}
-		else if (!strcmp(rdbuf, "game3"))
-		{
-			Game3(fd_stdin, fd_stdout);
-		}
-		else if (!strcmp(rdbuf, "game4"))
-		{
-			Game4(fd_stdin, fd_stdout);
-		}
-		else if (!strcmp(rdbuf, "game5"))
-		{
-			reactionTime(fd_stdin, fd_stdout);
-		}
-		else if (!strcmp(rdbuf, "timer"))
-		{
-			DigitNumber(fd_stdin, fd_stdout);
-		}
-		else if (strcmp(rdbuf, "cl") == 0)
-		{
-			clearview();
-			welcome();
+			printf("Input password.\n");
+			int r = read(fd_stdin, rdbuf, 70);
+			rdbuf[r] = 0;
+			if (!strcmp(rdbuf, "tongji"))
+				user = 1;
+			else
+			{
+				printf("Wrong password!\n");
+				continue;
+			}
 		}
 		else
-			printf("Wrong command!\n");
+		{
+			user = 2;
+		}
+
+		welcome();
+
+		while (1)
+		{
+			printf("SnakeOS for you: $ ");
+			int r = read(fd_stdin, rdbuf, 70);
+			rdbuf[r] = 0;
+			if (!strcmp(rdbuf, "process"))
+			{
+				if (user == 1)
+					ProcessManager(fd_stdin, fd_stdout);
+				else
+					printf("Please use the admin account.\n");
+				continue;
+			}
+			else if (!strcmp(rdbuf, "help"))
+			{
+				help();
+			}
+			else if (!strcmp(rdbuf, "game1"))
+			{
+				Game1(fd_stdin, fd_stdout);
+			}
+			else if (!strcmp(rdbuf, "game2"))
+			{
+				Game2(fd_stdin, fd_stdout);
+			}
+			else if (!strcmp(rdbuf, "game3"))
+			{
+				Game3(fd_stdin, fd_stdout);
+			}
+			else if (!strcmp(rdbuf, "game4"))
+			{
+				Game4(fd_stdin, fd_stdout);
+			}
+			else if (!strcmp(rdbuf, "game5"))
+			{
+				reactionTime(fd_stdin, fd_stdout);
+			}
+			else if (!strcmp(rdbuf, "timer"))
+			{
+				DigitNumber(fd_stdin, fd_stdout);
+			}
+			else if (strcmp(rdbuf, "cl") == 0)
+			{
+				clearview();
+				welcome();
+			}
+			else if (!strcmp(rdbuf, "exit"))
+				break;
+			else
+				printf("Wrong command!\n");
+		}
 	}
 }
 /*****************************************************************************
@@ -2028,7 +2063,9 @@ void TestB()
 		rdbuf[r] = 0;
 
 		/*进行判断*/
-		if (!strcmp(rdbuf, "help")) {
+		if (user != 1)
+			printf("Please use the admin account.\n");
+		else if (!strcmp(rdbuf, "help")) {
 			help_b();
 			continue;
 		}
